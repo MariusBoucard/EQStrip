@@ -27,24 +27,29 @@ public:
 		getMapperInstance().mSampleRate = sampleRate;
 		// TODO Set reload all
 	}
-	static void setHpf(     juce::ReferenceCountedArray<juce::dsp::IIR::Coefficients<float>>& inSetup,double inFreq, double inQ)
+	static void setHpf(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup,double inFreq, double inQ)
 	{
-		// TODO SampleRate access
-		auto order = 2;// std::max(inQ,1);
-		auto newCoeffs = juce::dsp::FilterDesign<float>::designIIRHighpassHighOrderButterworthMethod(inFreq, 44100, order);
+		auto sampleRate = getMapperInstance().mSampleRate;
+		auto order = std::max(inQ,1.0); // Clip Q to 1.0
+		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, inFreq, order);
 
 		inSetup = newCoeffs;
-		//  inSetup.clear();
-		//  for (int i = 0; i < newCoeffs.size(); i++)
-		//  {
-		//  	inSetup.add(newCoeffs);
-		// }
 	}
-	static void setBell(double inBellSetup, double bell)// TODO
+	static void setBell(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup, double inFreq, double inQ, double inGain) {
+		auto sampleRate = getMapperInstance().mSampleRate;
+		auto order = std::max(inQ, 1.0); // Clip Q to 1.0
+		auto gain = std::max(inGain, 1.0); // Clip gain to 0.0
+		auto newCoeffs = dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, inFreq, order, gain);
+		inSetup = newCoeffs;
+	}
+	static void setHighShelf(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup, double inFreq, double inQ, double inGain)
 	{
-		inBellSetup = bell;
+		auto sampleRate = getMapperInstance().mSampleRate;
+		auto order = std::max(inQ, 1.0); // Clip Q to 1.0
+		auto gain = std::max(inGain, 1.0); // Clip gain to 0.0
+		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, inFreq, order,0);
+		inSetup = newCoeffs;
 	}
-
 
 	// static void setToneStackMid(recursive_linear_filter::BiquadParams& inMidSetup, const double val) {
 	// }

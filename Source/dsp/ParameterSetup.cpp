@@ -26,9 +26,7 @@ ParameterSetup::~ParameterSetup() {
 
 ParameterSetupData ParameterSetup::createSetupData() {
     ParameterSetupData data;
-
-    data.highPassFilterCoeffs = {0.0, 0.0};
-    data.gain = 0.0;
+    ;
     return data;
 }
 
@@ -54,15 +52,24 @@ void ParameterSetup::initParametersListener() {
 }
 
 void ParameterSetup::initializeParameters() {
-    auto *gainParam = mParameters.getRawParameterValue("gain");
-    parameterChanged("gain",gainParam->load()) ;
+    parameterChanged("HPF_Freq",mParameters.getRawParameterValue("HPF_Freq")->load());
+    parameterChanged("HPF_Freq", mParameters.getRawParameterValue("HPF_Freq")->load());
+    parameterChanged("HPF_Q", mParameters.getRawParameterValue("HPF_Q")->load());
 
-    if (auto *lpCutoffParam = mParameters.getRawParameterValue("lowPassCutoff"))
-        mNextParamsForProcessing->lowPassFilterCoeffs.cutoff = static_cast<double>(lpCutoffParam->load());
+    // Bell Filter 1 (Mid1)
+    parameterChanged("Bell1_Freq", mParameters.getRawParameterValue("Bell1_Freq")->load());
+    parameterChanged("Bell1_Gain", mParameters.getRawParameterValue("Bell1_Gain")->load());
+    parameterChanged("Bell1_Q", mParameters.getRawParameterValue("Bell1_Q")->load());
 
-    if (auto *hpResonanceParam = mParameters.getRawParameterValue("highPassResonance"))
-        mNextParamsForProcessing->highPassFilterCoeffs.resonance = static_cast<double>(hpResonanceParam->load());
+    parameterChanged("Bell2_Freq", mParameters.getRawParameterValue("Bell2_Freq")->load());
+    parameterChanged("Bell2_Gain", mParameters.getRawParameterValue("Bell2_Gain")->load());
+    parameterChanged("Bell2_Q", mParameters.getRawParameterValue("Bell2_Q")->load());
 
+
+    // High-Shelf Filter (HSF)
+    parameterChanged("HS_Freq", mParameters.getRawParameterValue("HS_Freq")->load());
+    parameterChanged("HS_Gain", mParameters.getRawParameterValue("HS_Gain")->load());
+    parameterChanged("HS_Q", mParameters.getRawParameterValue("HS_Q")->load());
     mNextParamsForProcessing->version = 0;
 }
 
@@ -85,23 +92,99 @@ void ParameterSetup::parameterChanged(const juce::String &parameterID, float new
             Mappers::setGain(paramsToUpdate->gain, static_cast<double>(newValue));
             calculationPerformed = true;
         }
+
         std::smatch match;
         std::string paramIDCopyStr = paramIDCopy.toStdString();
         if (std::regex_match(paramIDCopyStr, match, std::regex("^HPF.*"))) {
             if (paramIDCopyStr == "HPF_Freq") {
-
                 auto* hpfParam = mParameters.getRawParameterValue("HPF_Q");
-                double hpfValue = hpfParam ? static_cast<double>(*hpfParam) : 0.0;
+                double hpfValue = hpfParam ? static_cast<double>(*hpfParam) : 2.0;
                 Mappers::setHpf(paramsToUpdate->mHighPassCoeffs, static_cast<double>(newValue), hpfValue);
             }
             if (paramIDCopyStr == "HPF_Q") {
                 auto* hpfParam = mParameters.getRawParameterValue("HPF_Freq");
-                double hpfValue = hpfParam ? static_cast<double>(*hpfParam) : 0.0;
+                double hpfValue = hpfParam ? static_cast<double>(*hpfParam) : 100.0;
                 Mappers::setHpf(paramsToUpdate->mHighPassCoeffs,hpfValue, static_cast<double>(newValue));
             }
-
             calculationPerformed = true;
         }
+
+        if (std::regex_match(paramIDCopyStr, match, std::regex("^Bell1.*"))) {
+            if (paramIDCopyStr == "Bell1_Freq") {
+                auto* qParam = mParameters.getRawParameterValue("Bell1_Q");
+                double q = qParam ? mParameters.getRawParameterValue("Bell1_Q")->load() : 0.707;
+
+                auto gainParam = mParameters.getRawParameterValue("Bell1_Gain");
+                double gain = gainParam ? mParameters.getRawParameterValue("Bell1_Gain")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell1Coeffs,newValue,q,gain);
+            }
+            if (paramIDCopyStr == "Bell1_Gain") {
+                auto* qParam = mParameters.getRawParameterValue("Bell1_Q");
+                double q = qParam ? mParameters.getRawParameterValue("Bell1_Q")->load() : 0.707;
+
+                auto freqParam = mParameters.getRawParameterValue("Bell1_Freq") ;
+                auto freq = freqParam ? mParameters.getRawParameterValue("Bell1_Freq")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,q,newValue);
+            }
+            if (paramIDCopyStr == "Bell1_Q") {
+                auto gainParam = mParameters.getRawParameterValue("Bell1_Gain");
+                double gain = gainParam ? mParameters.getRawParameterValue("Bell1_Gain")->load() : 2.0;
+
+                auto freqParam = mParameters.getRawParameterValue("Bell1_Freq") ;
+                auto freq = freqParam ? mParameters.getRawParameterValue("Bell1_Freq")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,newValue,gain);
+            }
+            calculationPerformed = true;
+        }
+        if (std::regex_match(paramIDCopyStr, match, std::regex("^Bell2.*"))) {
+            if (paramIDCopyStr == "Bell2_Freq") {
+                auto qParam = mParameters.getRawParameterValue("Bell2_Q");
+                auto q = qParam ? mParameters.getRawParameterValue("Bell2_Q")->load() : 2.0;
+                auto gainParam = mParameters.getRawParameterValue("Bell2_Gain");
+                auto gain = gainParam ? mParameters.getRawParameterValue("Bell2_Gain")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell2Coeffs,newValue,q,gain);
+            }
+            if (paramIDCopyStr == "Bell2_Gain") {
+                auto qParam = mParameters.getRawParameterValue("Bell2_Q");
+                auto q = qParam ? mParameters.getRawParameterValue("Bell2_Q")->load() : 2.0;
+                auto freqParam = mParameters.getRawParameterValue("Bell2_Freq");
+                auto freq = freqParam? mParameters.getRawParameterValue("Bell2_Freq")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,q,newValue);
+            }
+            if (paramIDCopyStr == "Bell2_Q") {
+                auto gainParam = mParameters.getRawParameterValue("Bell2_Gain");
+                auto gain = gainParam ? mParameters.getRawParameterValue("Bell2_Gain")->load() : 2.0;
+                auto freqParam = mParameters.getRawParameterValue("Bell2_Freq");
+                auto freq = freqParam? mParameters.getRawParameterValue("Bell2_Freq")->load() : 2.0;
+                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,newValue,gain);
+            }
+            calculationPerformed = true;
+        }
+
+        if (std::regex_match(paramIDCopyStr, match, std::regex("^HS.*"))) {
+            if (paramIDCopyStr == "HS_Freq") {
+                auto qParam = mParameters.getRawParameterValue("HS_Q");
+                auto q = qParam ? mParameters.getRawParameterValue("HS_Q")->load() : 2.0;
+                auto gainParam = mParameters.getRawParameterValue("HS_Gain");
+                auto gain = gainParam ? mParameters.getRawParameterValue("HS_Gain")->load() : 2.0;
+                Mappers::setHighShelf(paramsToUpdate->mHighShelfCoeffs,newValue,q,gain);
+            }
+            if (paramIDCopyStr == "HS_Gain") {
+                auto qParam = mParameters.getRawParameterValue("HS_Q");
+                auto q = qParam ? mParameters.getRawParameterValue("HS_Q")->load() : 2.0;
+                auto freqParam = mParameters.getRawParameterValue("HS_Freq");
+                auto freq = freqParam ? mParameters.getRawParameterValue("HS_Freq")->load() : 2.0;
+                Mappers::setHighShelf(paramsToUpdate->mHighShelfCoeffs,freq,q,newValue);
+            }
+            if (paramIDCopyStr == "HS_Q") {
+                auto gainParam = mParameters.getRawParameterValue("HS_Gain");
+                auto gain = gainParam ? mParameters.getRawParameterValue("HS_Gain")->load() : 2.0;
+                auto freqParam = mParameters.getRawParameterValue("HS_Freq");
+                auto freq = freqParam ? mParameters.getRawParameterValue("HS_Freq")->load() : 2.0;                Mappers::setHighShelf(paramsToUpdate->mHighShelfCoeffs,freq,newValue,gain);
+            }
+            calculationPerformed = true;
+        }
+
         if (calculationPerformed) {
             std::lock_guard<std::mutex> lock(mUpdateMutex);
             paramsToUpdate->version++; // Increment the version of the data that's about to become current.

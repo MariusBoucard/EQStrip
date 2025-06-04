@@ -2,7 +2,7 @@
 #include <JuceHeader.h>
 #include <random>
 #include "Processor.hpp"
-#include "Bones/HighPassFilter.h"
+#include "Bones/FilterCell.h"
 //==============================================================================
 class SkeletonAudioProcessor final : public AudioProcessor {
 public:
@@ -13,10 +13,18 @@ public:
     ~SkeletonAudioProcessor() override;
 
 
-    void prepareToPlay(double, int) override {
-        mSampleRate = getSampleRate();
-        mBlockSize = getBlockSize();
+    void prepareToPlay(double inSampleRate, int inBlockSize) override {
+        mSampleRate = inSampleRate;
+        mBlockSize = inBlockSize;
+        auto sp = getSampleRate();
+        mProcessorGraph.clear();
 
+        mProcessorGraph.setPlayConfigDetails (getTotalNumInputChannels(),
+                                              getTotalNumOutputChannels(),
+                                              mSampleRate,
+                                              mBlockSize);
+        initialiseGraph();
+        mProcessorGraph.rebuild();
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);
     }
@@ -37,7 +45,7 @@ public:
     bool hasEditor() const override { return false; }
 
     //==============================================================================
-    const String getName() const override { return "Radiator"; }
+    const String getName() const override { return "EQStrip"; }
     bool acceptsMidi() const override { return false; }
     bool producesMidi() const override { return false; }
     double getTailLengthSeconds() const override { return 0; }
@@ -89,10 +97,24 @@ public:
     void initialiseGraph() {
         mInputNode = mProcessorGraph.addNode(std::make_unique<AudioInputNode>(AudioInputNode::audioInputNode));
         mOutputNode = mProcessorGraph.addNode(std::make_unique<AudioOutputNode>(AudioOutputNode::audioOutputNode));
-        //mGainNode = mProcessorGraph.addNode(std::make_unique<GainProcessor>(mParameters));
-        mHpfNode = mProcessorGraph.addNode(std::make_unique<HighPassFilter>(mParameters,mParameterSetup));
-        for (int channel = 0; channel < 2; ++channel)
-        {
+
+        mHpfNode = mProcessorGraph.addNode(std::make_unique<FilterCell>(mParameters, mParameterSetup,FilterType::HighPass));
+
+        mBellNode1 = mProcessorGraph.addNode(std::make_unique<FilterCell>(mParameters, mParameterSetup,FilterType::Bell1));
+
+        mBellNode2 = mProcessorGraph.addNode(std::make_unique<FilterCell>(mParameters, mParameterSetup,
+                                                                          FilterType::Bell2));
+        mHShelfNode = mProcessorGraph.addNode(std::make_unique<FilterCell>(mParameters, mParameterSetup,
+                                                                 FilterType::HighShelf));
+
+        jassert(mInputNode != nullptr);
+        jassert(mOutputNode != nullptr);
+         jassert(mHpfNode != nullptr);
+
+
+         int numChannels = mProcessorGraph.getNumInputChannels();
+
+        for (int channel = 0; channel < numChannels; ++channel) {
             mProcessorGraph.addConnection({
                 {mInputNode->nodeID, channel},
                 {mHpfNode->nodeID, channel}
@@ -100,14 +122,23 @@ public:
 
             mProcessorGraph.addConnection({
                 {mHpfNode->nodeID, channel},
-                {mOutputNode->nodeID, channel}
+                {mBellNode1->nodeID, channel}
             });
-        }
-    }
+            mProcessorGraph.addConnection({
+                {mBellNode1->nodeID, channel},
+                {mBellNode2->nodeID, channel}
+            });
+            mProcessorGraph.addConnection({
+                {mBellNode2->nodeID, channel},
+                {mOutputNode->nodeID, channel}
+        });
 
-    void setRateAndBufferSizeDetails(double sampleRate, int bufferSize) {
-        mSampleRate = sampleRate;
-        mBlockSize = bufferSize;
+            // mProcessorGraph.addConnection({
+            //     {mHShelfNode->nodeID, channel},
+            //     {mOutputNode->nodeID, channel}
+            // });
+        }
+
     }
 
 private:
@@ -126,12 +157,13 @@ private:
     using AudioInputNode = juce::AudioProcessorGraph::AudioGraphIOProcessor;
     using AudioOutputNode = juce::AudioProcessorGraph::AudioGraphIOProcessor;
 
-    // using NamNode         = VotreClasseNAMProcessor; // Hérite de juce::AudioProcessor
-
     juce::AudioProcessorGraph::Node::Ptr mInputNode;
     juce::AudioProcessorGraph::Node::Ptr mOutputNode;
-   // juce::AudioProcessorGraph::Node::Ptr mGainNode;
     juce::AudioProcessorGraph::Node::Ptr mHpfNode;
+    juce::AudioProcessorGraph::Node::Ptr mBellNode1;
+    juce::AudioProcessorGraph::Node::Ptr mBellNode2;
+    juce::AudioProcessorGraph::Node::Ptr mHShelfNode;
+
     double mBlockSize;
     double mSampleRate;
     //==============================================================================

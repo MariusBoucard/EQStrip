@@ -90,6 +90,7 @@ jucer_project_files("EQStrip/Source/dsp/Bones"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
         x         .         .         "Source/dsp/Bones/GainBone.h"
+        x          .       .            "Source/dsp/Bones/FilterCell.h"
 
 )
 

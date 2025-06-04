@@ -15,8 +15,6 @@ SkeletonAudioProcessor::SkeletonAudioProcessor(juce::AudioProcessorValueTreeStat
     , mBlockSize(256)
     , mSampleRate(44100)
 {
-    setRateAndBufferSizeDetails(mSampleRate, mBlockSize);
-    initialiseGraph();
 }
 SkeletonAudioProcessor::~SkeletonAudioProcessor()
 {

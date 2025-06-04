@@ -8,21 +8,22 @@
 #include <juce_dsp/juce_dsp.h>
 #include "Mappers.h"
 
-struct FilterCoefficients
+enum class FilterType
 {
-    double cutoff = 2000.0;
-    double resonance = 0.707;
+    HighPass,
+    LowPass,
+    Bell1,
+    Bell2,
+    HighShelf
 };
 
 struct ParameterSetupData
 {
-    juce::ReferenceCountedArray<juce::dsp::IIR::Coefficients<float>> mHighPassCoeffs;
-    juce::ReferenceCountedArray<juce::dsp::IIR::Coefficients<float>> mHighShelfCoeffs;
-    juce::ReferenceCountedArray<juce::dsp::IIR::Coefficients<float>> mBell1Coeffs;
-    juce::ReferenceCountedArray<juce::dsp::IIR::Coefficients<float>> mBell2Coeffs;
+    juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>> mHighPassCoeffs;
+    juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>> mHighShelfCoeffs;
+    juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>> mBell1Coeffs;
+    juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>> mBell2Coeffs;
 
-    FilterCoefficients lowPassFilterCoeffs;
-    FilterCoefficients highPassFilterCoeffs;
     double gain = 0.0;
     uint64_t version = 0;
 };
@@ -37,7 +38,7 @@ public:
 
     ParameterSetupData createSetupData();
 
-    void parameterChanged(const juce::String& parameterID, float newValue) override;
+    void parameterChanged(const juce::String& parameterID, float newValue) override; // TODO Move this logic to another class
 
     const ParameterSetupData* getAudioThreadParams() const;
 

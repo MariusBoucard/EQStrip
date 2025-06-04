@@ -111,6 +111,16 @@ public:
             // .withStringFromValueFunction(qValueToString)
             // .withValueFromStringFunction(stringToQValue)
     ));
+        params.push_back(std::make_unique<juce::AudioParameterFloat>(
+    juce::ParameterID{"Bell2_Freq", 1},
+    "Bell 2 Freq",
+    juce::NormalisableRange<float>(500.f, 10000.0f, 1.f),
+    1.0f,
+    juce::AudioParameterFloatAttributes()
+        .withLabel("Hz")
+        // .withStringFromValueFunction(qValueToString)
+        // .withValueFromStringFunction(stringToQValue)
+));
 
           params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell2_Gain", 1},

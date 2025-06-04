@@ -3,23 +3,22 @@
 #include <JuceHeader.h>
 
 #include "../ParameterSetup.h"
-
-//==============================================================================
-/**
-*/
-class HighPassFilter  : public juce::AudioProcessor
-{
+// Could be templated on the FILTER TYPE ! // TODO
+class FilterCell : public juce::AudioProcessor {
 public:
     //==============================================================================
-    HighPassFilter(juce::AudioProcessorValueTreeState& inParameters, ParameterSetup& inParameterSetup)
-        : AudioProcessor (BusesProperties().withInput  ("Input",  juce::AudioChannelSet::stereo(), true)
-                                           .withOutput ("Output", juce::AudioChannelSet::stereo(), true))
-        , mParameters(inParameters)
-        , mParameterSetup(inParameterSetup)
+    FilterCell(juce::AudioProcessorValueTreeState &inParameters,
+                   ParameterSetup &inParameterSetup,
+                   FilterType inType)
+        : AudioProcessor(BusesProperties().withInput("Input", juce::AudioChannelSet::stereo(), true)
+              .withOutput("Output", juce::AudioChannelSet::stereo(), true))
+          , mParameters(inParameters)
+          , mParameterSetup(inParameterSetup)
+          , mType(inType)
     {
     }
 
-    ~HighPassFilter() override
+    ~FilterCell() override
     {
 
     }
@@ -27,7 +26,14 @@ public:
     //==============================================================================
     void prepareToPlay (double sampleRate, int samplesPerBlock) override
     {
-        juce::ignoreUnused (sampleRate, samplesPerBlock);
+        dsp::ProcessSpec spec;
+        spec.sampleRate = sampleRate;
+        spec.maximumBlockSize = samplesPerBlock;
+        spec.numChannels = getTotalNumOutputChannels();
+
+        mHighPassFilters.prepare(spec);
+        mHighPassFilters.reset();
+        _sleep(20);
     }
 
     void releaseResources() override
@@ -55,26 +61,36 @@ public:
     }
    #endif
 
-    void processBlock (juce::AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override {
+    void updateFilter()
+    {
+        // TODO Pass the coeff through hierarchy to factorize memory blocking.
+        // This will imply overriding the processorGraph to handle the coeff passing.
+        //mHighPassFilters.state = mCoefficientsProvider();
+       if (mType == FilterType::HighPass) {
+           *mHighPassFilters.state = *mParameterSetup.getAudioThreadParams()->mHighPassCoeffs;
+       }
+        if (mType == FilterType::Bell1) {
+            *mHighPassFilters.state = *mParameterSetup.getAudioThreadParams()->mBell1Coeffs;
+        }
+        if (mType == FilterType::Bell2) {
+            *mHighPassFilters.state = *mParameterSetup.getAudioThreadParams()->mBell2Coeffs;
+        }
+        if (mType == FilterType::HighShelf) {
+            *mHighPassFilters.state = *mParameterSetup.getAudioThreadParams()->mHighShelfCoeffs;
+        }
+    };
+    void processBlock (AudioBuffer<float>& buffer, juce::MidiBuffer& midiMessages) override {
         juce::ignoreUnused (midiMessages);
-        auto coeffs = mParameterSetup.getAudioThreadParams()->mHighPassCoeffs;
+        auto totalNumInputChannels  = getTotalNumInputChannels();
+        auto totalNumOutputChannels = getTotalNumOutputChannels();
+        updateFilter();
 
-        if (coeffs.begin() != coeffs.end()) {
-            auto it = coeffs.begin();
-            for (int ch = 0; ch < 2; ++ch) {
-                *mHighPassFilters[ch].coefficients = **it;  // double dereference: iterator -> shared_ptr -> object
-            }
-        }
-        if (coeffs.begin() != coeffs.end()) {
-            juce::dsp::AudioBlock<float> block(buffer);
-            // Process each channel separately
-            for (size_t ch = 0; ch < 2; ++ch) {
-                auto channelBlock = block.getSingleChannelBlock(ch);
-                juce::dsp::ProcessContextReplacing<float> context(channelBlock);
-            //    mHighPassFilters[ch].process(context);
-            }
-        }
+        for (auto i = totalNumInputChannels; i < totalNumOutputChannels; ++i)
+            buffer.clear (i, 0, buffer.getNumSamples());
 
+        dsp::AudioBlock <float> block (buffer);
+        updateFilter();
+        mHighPassFilters.process(dsp::ProcessContextReplacing<float> (block));
     }
 
     //==============================================================================
@@ -109,9 +125,9 @@ public:
     }
 
 private:
+    FilterType mType;
     juce::AudioProcessorValueTreeState& mParameters;
     ParameterSetup& mParameterSetup;
-    std::array<juce::dsp::IIR::Filter<float>, 2> mHighPassFilters;
-    //==============================================================================
-    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(HighPassFilter)
+    dsp::ProcessorDuplicator <dsp::IIR::Filter<float>, dsp::IIR::Coefficients <float>> mHighPassFilters;    //==============================================================================
+    JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(FilterCell)
 };
