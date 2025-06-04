@@ -47,7 +47,7 @@ public:
 		auto sampleRate = getMapperInstance().mSampleRate;
 		auto order = std::max(inQ, 1.0); // Clip Q to 1.0
 		auto gain = std::max(inGain, 1.0); // Clip gain to 0.0
-		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, inFreq, order,0);
+		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, inFreq, order,gain);
 		inSetup = newCoeffs;
 	}
 

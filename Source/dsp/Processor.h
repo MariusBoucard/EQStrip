@@ -130,13 +130,13 @@ public:
             });
             mProcessorGraph.addConnection({
                 {mBellNode2->nodeID, channel},
-                {mOutputNode->nodeID, channel}
+                {mHShelfNode->nodeID, channel}
         });
 
-            // mProcessorGraph.addConnection({
-            //     {mHShelfNode->nodeID, channel},
-            //     {mOutputNode->nodeID, channel}
-            // });
+            mProcessorGraph.addConnection({
+                {mHShelfNode->nodeID, channel},
+                {mOutputNode->nodeID, channel}
+            });
         }
 
     }

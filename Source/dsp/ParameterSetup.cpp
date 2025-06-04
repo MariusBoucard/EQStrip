@@ -187,7 +187,7 @@ void ParameterSetup::parameterChanged(const juce::String &parameterID, float new
 
         if (calculationPerformed) {
             std::lock_guard<std::mutex> lock(mUpdateMutex);
-            paramsToUpdate->version++; // Increment the version of the data that's about to become current.
+            paramsToUpdate->version++;
             performSwap();
         }
     }; {
