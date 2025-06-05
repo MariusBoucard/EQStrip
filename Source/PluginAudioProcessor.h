@@ -61,7 +61,7 @@ public:
          params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"HPF_Freq", 1}, // Parameter ID and version hint
         "HPF Frequency",                  // Parameter Name
-        juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 0.3f), // Range (min, max, interval, skewFactor for log-like response)
+        juce::NormalisableRange<float>(20.0f, 300.0f, 1.0f, 0.3f), // Range (min, max, interval, skewFactor for log-like response)
         80.0f,                            // Default value
         juce::AudioParameterFloatAttributes()
             .withLabel("Hz")
@@ -71,7 +71,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"HPF_Q", 1},
         "HPF Q",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.01f),
+        juce::NormalisableRange<float>(0.3f, 2.0f, 0.01f),
         0.707f, // Butterworth response Q
         juce::AudioParameterFloatAttributes()
             .withLabel("Q")
@@ -84,7 +84,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell1_Freq", 1},
         "Bell 1 Frequency",
-        juce::NormalisableRange<float>(20.0f, 20000.0f, 1.0f, 0.3f),
+        juce::NormalisableRange<float>(200.0f, 3000.0f, 1.0f, 0.3f),
         500.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("Hz")
@@ -94,7 +94,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell1_Gain", 1},
         "Bell 1 Gain",
-        juce::NormalisableRange<float>(-24.0f, 24.0f, 0.1f),
+        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
         0.0f, // Default gain (no change)
         juce::AudioParameterFloatAttributes()
             .withLabel("dB")
@@ -104,7 +104,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell1_Q", 1},
         "Bell 1 Q",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.01f),
+        juce::NormalisableRange<float>(0.2f, 20.0f, 0.01f),
         1.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("Q")
@@ -114,7 +114,7 @@ public:
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
     juce::ParameterID{"Bell2_Freq", 1},
     "Bell 2 Freq",
-    juce::NormalisableRange<float>(500.f, 10000.0f, 1.f),
+    juce::NormalisableRange<float>(500.f, 12000.0f, 1.f, 3.f),
     1.0f,
     juce::AudioParameterFloatAttributes()
         .withLabel("Hz")
@@ -125,7 +125,7 @@ public:
           params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell2_Gain", 1},
         "Bell 2 Gain",
-        juce::NormalisableRange<float>(-24.0f, 24.0f, 0.1f),
+        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
         0.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("dB")
@@ -135,7 +135,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"Bell2_Q", 1},
         "Bell 2 Q",
-        juce::NormalisableRange<float>(0.1f, 10.0f, 0.01f),
+        juce::NormalisableRange<float>(0.2f, 20.0f, 0.01f),
         1.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("Q")
@@ -148,7 +148,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"HS_Freq", 1},
         "High-Shelf Frequency",
-        juce::NormalisableRange<float>(500.0f, 20000.0f, 1.0f, 0.35f), // Slightly different skew might feel better for shelves
+        juce::NormalisableRange<float>(1000.0f, 20000.0f, 1.0f, 0.35f), // Slightly different skew might feel better for shelves
         8000.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("Hz")
@@ -158,7 +158,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"HS_Gain", 1},
         "High-Shelf Gain",
-        juce::NormalisableRange<float>(-24.0f, 24.0f, 0.1f),
+        juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
         0.0f,
         juce::AudioParameterFloatAttributes()
             .withLabel("dB")
@@ -168,7 +168,7 @@ public:
     params.push_back(std::make_unique<juce::AudioParameterFloat>(
         juce::ParameterID{"HS_Q", 1},
         "High-Shelf Q/Slope", // Label clarifies Q is for shelf slope
-        juce::NormalisableRange<float>(0.1f, 2.0f, 0.01f), // Q range for shelves often differs
+        juce::NormalisableRange<float>(0.1f, 20.0f, 0.01f), // Q range for shelves often differs
         0.707f,
         juce::AudioParameterFloatAttributes()
             .withLabel("Q")
