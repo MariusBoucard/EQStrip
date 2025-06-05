@@ -149,14 +149,14 @@ void ParameterSetup::parameterChanged(const juce::String &parameterID, float new
                 auto q = qParam ? mParameters.getRawParameterValue("Bell2_Q")->load() : 2.0;
                 auto freqParam = mParameters.getRawParameterValue("Bell2_Freq");
                 auto freq = freqParam? mParameters.getRawParameterValue("Bell2_Freq")->load() : 2.0;
-                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,q,newValue);
+                Mappers::setBell(paramsToUpdate->mBell2Coeffs,freq,q,newValue);
             }
             if (paramIDCopyStr == "Bell2_Q") {
                 auto gainParam = mParameters.getRawParameterValue("Bell2_Gain");
                 auto gain = gainParam ? mParameters.getRawParameterValue("Bell2_Gain")->load() : 2.0;
                 auto freqParam = mParameters.getRawParameterValue("Bell2_Freq");
                 auto freq = freqParam? mParameters.getRawParameterValue("Bell2_Freq")->load() : 2.0;
-                Mappers::setBell(paramsToUpdate->mBell1Coeffs,freq,newValue,gain);
+                Mappers::setBell(paramsToUpdate->mBell2Coeffs,freq,newValue,gain);
             }
             calculationPerformed = true;
         }
