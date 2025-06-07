@@ -18,6 +18,15 @@ void RootViewComponent::defineKnobLayout()
 	mTopBarLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mTopBarLayout);
 
+	mAnalyzerLayout.inLayout.x = 60;
+mAnalyzerLayout.inLayout.y = 60;
+mAnalyzerLayout.inLayout.frameWidth = 800; // Relative to parent
+mAnalyzerLayout.inLayout.frameHeight = 400;
+mAnalyzerLayout.inLayout.ratio = mScale;
+mAnalyzerLayout.inLayout.textboxHeight = 0;
+mAnalyzerLayout.inLayout.textboxPadding = 0;
+computeKnobLayout(mAnalyzerLayout);
+
 }
 
 
@@ -39,6 +48,8 @@ void RootViewComponent::configureNodes(juce::AudioProcessor& inProcessor)
 	mGainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
 	mTopBar.setBounds(mTopBarLayout.outLayout.x,mTopBarLayout.outLayout.y,mTopBarLayout.outLayout.sliderWidth,mTopBarLayout.outLayout.sliderHeight);
-	addAndMakeVisible(mTopBar);
+	mAnalyzer.setBounds(mAnalyzerLayout.outLayout.x,mAnalyzerLayout.outLayout.y,mAnalyzerLayout.outLayout.sliderWidth,mAnalyzerLayout.outLayout.sliderHeight);
+addAndMakeVisible(mTopBar);
 	addAndMakeVisible(mGainKnob);
+addAndMakeVisible(mAnalyzer);
 }

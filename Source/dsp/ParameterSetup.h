@@ -37,18 +37,13 @@ public:
     ~ParameterSetup() override;
 
     ParameterSetupData createSetupData();
-
     void parameterChanged(const juce::String& parameterID, float newValue) override; // TODO Move this logic to another class
-
     const ParameterSetupData* getAudioThreadParams() const;
-
     void initializeParameters();
 
 private:
     void run() override;
-
     void initParametersListener();
-
     void performSwap();
 
     ParameterSetupData mSetupData1;

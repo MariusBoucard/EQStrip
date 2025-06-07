@@ -215,8 +215,6 @@ void ParameterSetup::run() {
 }
 
 void ParameterSetup::performSwap() {
-    // mNextParamsForProcessing (which has just been updated) becomes the new mCurrentParamsForAudio.
-    // The old mCurrentParamsForAudio becomes the new mNextParamsForProcessing, ready for the next update cycle.
     ParameterSetupData *tempOldCurrentAudioParams = mCurrentParamsForAudio.load(std::memory_order_relaxed);
     mCurrentParamsForAudio.store(mNextParamsForProcessing, std::memory_order_release);
     mNextParamsForProcessing = tempOldCurrentAudioParams;

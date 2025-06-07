@@ -15,6 +15,7 @@ public:
 
     void prepareToPlay(double inSampleRate, int inBlockSize) override {
         mSampleRate = inSampleRate;
+
         mBlockSize = inBlockSize;
         mProcessorGraph.clear();
 
@@ -67,7 +68,7 @@ public:
     double getRmsLevelRight() const { return mRmsLevelRight.load(); }
     double getRmsOutputLevelLeft() const { return mRmsOutputLevelLeft.load(); }
     double getRmsOutputLevelRight() const { return mRmsOutputLevelRight.load(); }
-
+    ParameterSetup& getParameterSetup() { return mParameterSetup; }
     //==============================================================================
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override {
         return true;

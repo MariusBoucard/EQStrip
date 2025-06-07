@@ -116,6 +116,9 @@ jucer_project_files("EQStrip/Source/ui/components"
 #           Resource  Resource
   x         .         .         "Source/ui/components/TopBarComponent.cpp"
   x         .         .         "Source/ui/components/TopBarComponent.h"
+  x         .         .         "Source/ui/components/AnalyzerComponent.h"
+    x         .         .         "Source/ui/components/AnalyzerComponent.cpp"
+
 )
 
 

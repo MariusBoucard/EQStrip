@@ -7,6 +7,7 @@ RootViewComponent::RootViewComponent(juce::AudioProcessor& processor)
     : AudioProcessorEditor(processor)
     , mProcessor(processor)
     , mTopBar(processor)
+, mAnalyzer(mProcessor,dynamic_cast<SkeletonAudioProcessor&>(processor).getCustomParameterTree(),dynamic_cast<SkeletonAudioProcessor&>(processor).getParameterSetup())
 {
     auto imageData = BinaryData::plate_png;
     auto imageDataSize = BinaryData::plate_pngSize;
@@ -44,7 +45,7 @@ RootViewComponent::~RootViewComponent()
 void RootViewComponent::setSliderAttachement(AudioProcessor& inProcessor)
 {
     SkeletonAudioProcessor* processor = dynamic_cast<SkeletonAudioProcessor*>(&inProcessor);
-    mGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "gain", mGainKnob);
+    mGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "inputGain", mGainKnob);
 
 
 }
@@ -92,4 +93,10 @@ void RootViewComponent::resized()
     mTopBarLayout.inLayout.ratio = mScale;
     computeKnobLayout(mTopBarLayout);
     mTopBar.setBounds(mTopBarLayout.outLayout.x,mTopBarLayout.outLayout.y,mTopBarLayout.outLayout.sliderWidth,mTopBarLayout.outLayout.sliderHeight);
+
+    mAnalyzerLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mAnalyzerLayout);
+    mAnalyzer.setBounds(mAnalyzerLayout.outLayout.x,mAnalyzerLayout.outLayout.y,mAnalyzerLayout.outLayout.sliderWidth,mAnalyzerLayout.outLayout.sliderHeight);
+
+
 }

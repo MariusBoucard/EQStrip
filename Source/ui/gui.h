@@ -4,7 +4,7 @@
 #include "../looknfeel/TopBarLookAndFeel.h"
 #include "components/TopBarComponent.h"
 #include <JuceHeader.h>
-
+#include "components/AnalyzerComponent.h"
 class RootViewComponent : public juce::AudioProcessorEditor
 {
 public:
@@ -60,6 +60,9 @@ private:
 
     TopBarComponent mTopBar;
     KnobLayout mTopBarLayout;
+
+    ResponseCurveComponent mAnalyzer;
+    KnobLayout mAnalyzerLayout;
 
 #include "gui.hpp"
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(RootViewComponent)

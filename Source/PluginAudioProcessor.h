@@ -119,7 +119,7 @@ public:
             juce::ParameterID{"Bell1_Gain", 1},
             "Bell 1 Gain",
             juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
-            0.0f, // Default gain (no change)
+            10.0f,
             attributes
         ));
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
@@ -188,8 +188,8 @@ public:
     void processBlock(AudioBuffer<float>& buffer, MidiBuffer&) override;
 
     AudioProcessorEditor* createEditor() override {
-       // auto editor = new RootViewComponent(mSkeletonProcessor);
-        auto editor = new GenericAudioProcessorEditor(this);
+       auto editor = new RootViewComponent(mSkeletonProcessor);
+       // auto editor = new GenericAudioProcessorEditor(this);
 
         //editor->updatePath();
         return editor;
