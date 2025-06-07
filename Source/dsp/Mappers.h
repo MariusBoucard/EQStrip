@@ -19,26 +19,30 @@ public:
 		static Mappers instance;
 		return instance;
 	}
-	static void setGain(double& inGainSetup, double gain)
+	static void init(juce::AudioProcessorValueTreeState& parameters)
 	{
-		inGainSetup = gain;
+		getMapperInstance().mParameters = &parameters;
+	}
+	static juce::AudioProcessorValueTreeState& getParameters()
+	{
+		jassert(getMapperInstance().mParameters != nullptr && "Mappers not initialized with parameters!");
+		return *getMapperInstance().mParameters;
 	}
 	static void setSampleRate(double sampleRate)
 	{
 		getMapperInstance().mSampleRate = sampleRate;
-		// TODO Set reload all
 	}
 	static void setHpf(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup,double inFreq, double inQ)
 	{
 		auto sampleRate = getMapperInstance().mSampleRate;
-		auto order = std::max(inQ,0.01); // Clip Q to 1.0
+		auto order = std::max(inQ,0.02);
 		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighPass(sampleRate, inFreq, order);
 
 		inSetup = newCoeffs;
 	}
 	static void setBell(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup, double inFreq, double inQ, double inGain) {
 		auto sampleRate = getMapperInstance().mSampleRate;
-		auto order = std::max(inQ, 0.001); // Clip Q to 1.0
+		auto order = std::max(inQ, 0.02);
 		auto gain = std::pow(10.0, inGain / 20.0);
 		auto newCoeffs = dsp::IIR::Coefficients<float>::makePeakFilter(sampleRate, inFreq, order, gain);
 		inSetup = newCoeffs;
@@ -46,8 +50,7 @@ public:
 	static void setHighShelf(juce::ReferenceCountedObjectPtr<juce::dsp::IIR::Coefficients<float>>& inSetup, double inFreq, double inQ, double inGain)
 	{
 		auto sampleRate = getMapperInstance().mSampleRate;
-		auto order = std::max(inQ, 0.001); // Clip Q to 1.0
-		//auto gain = inGain ;
+		auto order = std::max(inQ, 0.02);
 		auto gain = std::pow(10.0, inGain / 20.0);
 
 		auto newCoeffs = dsp::IIR::Coefficients<float>::makeHighShelf(sampleRate, inFreq, order,gain);
@@ -56,5 +59,6 @@ public:
 
 private:
 	double mSampleRate;
+	juce::AudioProcessorValueTreeState* mParameters; // Store as pointer to avoid object slicing
 	// juce::AudioProcessorValueTreeState& mParameters; // TODO pass it parameters
 };

@@ -8,8 +8,8 @@ public:
     KnobLookAndFeel()
     {
         // Load the strip image from BinaryData
-        auto imageData = BinaryData::g1_png; // Replace with your strip image name
-        auto imageDataSize = BinaryData::g1_pngSize; // Replace with your strip image size
+        auto imageData = BinaryData::Bell1Freq_png; // Replace with your strip image name
+        auto imageDataSize = BinaryData::Bell1Freq_pngSize; // Replace with your strip image size
         mKnobStrip = juce::ImageFileFormat::loadFrom(imageData, imageDataSize);
 
         if (mKnobStrip.isNull())
@@ -30,7 +30,7 @@ public:
         if (mKnobStrip.isNull())
             return;
 
-        const int numFrames = 260;
+        const int numFrames = 270;
         int column = 10;
         const int row = numFrames / column; // Assuming the first row of the image
         const int frameIndex = (int)std::round(sliderPosProportional * (numFrames - 1)) % numFrames;

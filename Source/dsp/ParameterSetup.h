@@ -42,11 +42,13 @@ public:
 
     const ParameterSetupData* getAudioThreadParams() const;
 
+    void initializeParameters();
+
 private:
     void run() override;
 
     void initParametersListener();
-    void initializeParameters();
+
     void performSwap();
 
     ParameterSetupData mSetupData1;

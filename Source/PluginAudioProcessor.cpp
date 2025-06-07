@@ -9,12 +9,16 @@ PluginAudioProcessor::PluginAudioProcessor()
           .withOutput("Output", AudioChannelSet::stereo()))
       , mParameters(*this, nullptr, "PARAMETERS", createParameterLayout())
       , mParameterSetup(mParameters)
-      , mSkeletonProcessor(mParameters, mParameterSetup) {
+      , mSkeletonProcessor(mParameters, mParameterSetup)
+{
+    Mappers::init(mParameters);
 }
 
-PluginAudioProcessor::~PluginAudioProcessor() {
+PluginAudioProcessor::~PluginAudioProcessor()
+{
 }
 
-void PluginAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffer &a) {
+void PluginAudioProcessor::processBlock(AudioBuffer<float> &buffer, MidiBuffer &a)
+{
     mSkeletonProcessor.processBlock(buffer, a);
 }

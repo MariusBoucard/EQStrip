@@ -16,7 +16,6 @@ public:
     void prepareToPlay(double inSampleRate, int inBlockSize) override {
         mSampleRate = inSampleRate;
         mBlockSize = inBlockSize;
-        auto sp = getSampleRate();
         mProcessorGraph.clear();
 
         mProcessorGraph.setPlayConfigDetails (getTotalNumInputChannels(),
@@ -26,6 +25,7 @@ public:
         initialiseGraph();
         mProcessorGraph.rebuild();
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
+        mParameterSetup.initializeParameters();
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);
     }
 

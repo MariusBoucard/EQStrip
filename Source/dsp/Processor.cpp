@@ -45,7 +45,18 @@ void SkeletonAudioProcessor::updateMeter(bool isOutput, AudioBuffer<float>& buff
 void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuffer& inMidiBuffer)
 {
     juce::ScopedNoDenormals noDenormals;
-   // inBuffer.applyGain(mParameterSetup.getAudioThreadParams()->gain);
+    {
+        float gainInDecibels = mParameters.getParameterAsValue("inputGain").getValue();
+        auto inGain = std::pow(10.0f, (gainInDecibels) / 20.0f); // If we can migrate this pow to mappers
+        inBuffer.applyGain(inGain);
+    }
+
     mProcessorGraph.processBlock(inBuffer, inMidiBuffer);
+
+    {
+        float gainInDecibels = mParameters.getParameterAsValue("outputGain").getValue();
+        auto inGain = std::pow(10.0f, (gainInDecibels) / 20.0f); // If we can migrate this pow to mappers
+        inBuffer.applyGain(inGain);
+    }
     updateMeter(true, inBuffer, inBuffer.getNumSamples(), getTotalNumOutputChannels());
 }

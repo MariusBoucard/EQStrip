@@ -19,7 +19,6 @@ public:
     ~TopBarComponent() override
 	{
 		mAboutButton.setLookAndFeel(nullptr);
-
 		setLookAndFeel(nullptr); 
 	}
 
@@ -37,7 +36,7 @@ private:
 
     juce::AudioProcessor& audioProcessor;
     juce::TextButton mAboutButton{ "About" };
-    juce::Label mAmpNameLabel{ "RADIATOR" };
+    juce::Label mAmpNameLabel{ "EQ Strip" };
     BeautifulLabelLookAndFeel mLabelLookAndFeel; 
 
     void showAboutModal()
@@ -45,7 +44,7 @@ private:
         juce::AlertWindow::showMessageBoxAsync(
             juce::AlertWindow::InfoIcon,
             "About",
-            "Ballzzy's DSP | NAM - version 0.1",
+            "Ballzzy's DSP | EQStrip - version 0.1",
             "Lets get back to it");
     }
 

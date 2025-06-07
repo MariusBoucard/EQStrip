@@ -18,9 +18,7 @@ ParameterSetup::ParameterSetup(juce::AudioProcessorValueTreeState &inApvts)
 
 ParameterSetup::~ParameterSetup() {
     mTasksEvent.signal();
-    mParameters.removeParameterListener("gain", this);
-    mParameters.removeParameterListener("lowPassCutoff", this);
-    mParameters.removeParameterListener("highPassResonance", this);
+
     stopThread(10);
 }
 
@@ -65,7 +63,6 @@ void ParameterSetup::initializeParameters() {
     parameterChanged("Bell2_Gain", mParameters.getRawParameterValue("Bell2_Gain")->load());
     parameterChanged("Bell2_Q", mParameters.getRawParameterValue("Bell2_Q")->load());
 
-
     // High-Shelf Filter (HSF)
     parameterChanged("HS_Freq", mParameters.getRawParameterValue("HS_Freq")->load());
     parameterChanged("HS_Gain", mParameters.getRawParameterValue("HS_Gain")->load());
@@ -87,11 +84,6 @@ void ParameterSetup::parameterChanged(const juce::String &parameterID, float new
         }
 
         bool calculationPerformed = false;
-
-        if (paramIDCopy == "gain") {
-            Mappers::setGain(paramsToUpdate->gain, static_cast<double>(newValue));
-            calculationPerformed = true;
-        }
 
         std::smatch match;
         std::string paramIDCopyStr = paramIDCopy.toStdString();

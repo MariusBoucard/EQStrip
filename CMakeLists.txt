@@ -123,7 +123,19 @@ jucer_project_files("EQStrip/ressources/knob"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
 
-  .         x         x         "Source/ressources/knob/g1.png"
+  .         x         x         "Source/ressources/knob/Bell1Freq.png"
+.         x         x         "Source/ressources/knob/Bell1Gain.png"
+.         x         x         "Source/ressources/knob/GainKnob.png"
+.         x         x         "Source/ressources/knob/Bell2Freq.png"
+.         x         x         "Source/ressources/knob/Bell2Q.png"
+.         x         x         "Source/ressources/knob/Bell2gain.png"
+.         x         x         "Source/ressources/knob/LcFreq.png"
+.         x         x         "Source/ressources/knob/LcQ.png"
+.         x         x         "Source/ressources/knob/HSFreq.png"
+.         x         x         "Source/ressources/knob/HSGain.png"
+.         x         x         "Source/ressources/knob/HSq.png"
+.         x         x         "Source/ressources/knob/outputGain.png"
+
 )
 
 

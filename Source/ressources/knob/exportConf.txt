@@ -1,0 +1,12 @@
+Crop Box GainKnob.png: x: 15, y: 495, width: 160, height: 193
+Crop Box LcQ.png: x: 321, y: 900, width: 193, height: 155
+Crop Box LcFreq.png: x: 138, y: 802, width: 193, height: 159
+Crop Box Bell1Freq.png: x: 457, y: 741, width: 188, height: 159
+Crop Box Bell1Gain.png: x: 658, y: 898, width: 182, height: 157
+Crop Box Bell2Freq.png: x: 933, y: 805, width: 178, height: 167
+Crop Box Bell2Gain.png: x: 1111, y: 895, width: 175, height: 161
+Crop Box Bell2Q.png: x: 1260, y: 713, width: 175, height: 169
+Crop Box HSFreq.png: x: 1430, y: 889, width: 167, height: 166
+Crop Box HSGain.png: x: 1434, y: 706, width: 158, height: 165
+Crop Box HSq.png: x: 1627, y: 890, width: 176, height: 162
+Crop Box outputGain.png: x: 1725, y: 507, width: 186, height: 164
