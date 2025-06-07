@@ -18,14 +18,24 @@ void RootViewComponent::defineKnobLayout()
 	mTopBarLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mTopBarLayout);
 
-	mAnalyzerLayout.inLayout.x = 60;
-mAnalyzerLayout.inLayout.y = 60;
-mAnalyzerLayout.inLayout.frameWidth = 800; // Relative to parent
-mAnalyzerLayout.inLayout.frameHeight = 400;
-mAnalyzerLayout.inLayout.ratio = mScale;
-mAnalyzerLayout.inLayout.textboxHeight = 0;
-mAnalyzerLayout.inLayout.textboxPadding = 0;
-computeKnobLayout(mAnalyzerLayout);
+	mAnalyzerLayout.inLayout.x = 180;
+	mAnalyzerLayout.inLayout.y = 170;
+	mAnalyzerLayout.inLayout.frameWidth = 1560;
+	mAnalyzerLayout.inLayout.frameHeight = 330;
+	mAnalyzerLayout.inLayout.ratio = mScale;
+	mAnalyzerLayout.inLayout.textboxHeight = 0;
+	mAnalyzerLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mAnalyzerLayout);
+
+	mEQStripLayout.inLayout.x = 180;
+mEQStripLayout.inLayout.y = 400;
+mEQStripLayout.inLayout.frameWidth = 1560;
+mEQStripLayout.inLayout.frameHeight = 450;
+mEQStripLayout.inLayout.ratio = mScale;
+mEQStripLayout.inLayout.textboxHeight = 0;
+mEQStripLayout.inLayout.textboxPadding = 0;
+computeKnobLayout(mEQStripLayout);
+
 
 }
 
@@ -52,4 +62,7 @@ void RootViewComponent::configureNodes(juce::AudioProcessor& inProcessor)
 addAndMakeVisible(mTopBar);
 	addAndMakeVisible(mGainKnob);
 addAndMakeVisible(mAnalyzer);
+
+	mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);
+addAndMakeVisible(mEQStrip);
 }

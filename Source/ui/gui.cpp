@@ -7,6 +7,7 @@ RootViewComponent::RootViewComponent(juce::AudioProcessor& processor)
     : AudioProcessorEditor(processor)
     , mProcessor(processor)
     , mTopBar(processor)
+    , mEQStrip(processor)
 , mAnalyzer(mProcessor,dynamic_cast<SkeletonAudioProcessor&>(processor).getCustomParameterTree(),dynamic_cast<SkeletonAudioProcessor&>(processor).getParameterSetup())
 {
     auto imageData = BinaryData::plate_png;

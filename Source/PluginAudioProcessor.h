@@ -119,7 +119,7 @@ public:
             juce::ParameterID{"Bell1_Gain", 1},
             "Bell 1 Gain",
             juce::NormalisableRange<float>(-12.0f, 12.0f, 0.1f),
-            10.0f,
+            -10.0f, // Default gain (no change)
             attributes
         ));
         params.push_back(std::make_unique<juce::AudioParameterFloat>(

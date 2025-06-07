@@ -5,9 +5,12 @@
 #include "components/TopBarComponent.h"
 #include <JuceHeader.h>
 #include "components/AnalyzerComponent.h"
+#include "components/EQKnobComponent.h"
+
 class RootViewComponent : public juce::AudioProcessorEditor
 {
 public:
+    // SHOULD BE FZCTORIZED TODO
     struct KnobLayout {
         struct input {
             int x;
@@ -60,6 +63,9 @@ private:
 
     TopBarComponent mTopBar;
     KnobLayout mTopBarLayout;
+
+    EQKnobComponent mEQStrip;
+    KnobLayout mEQStripLayout;
 
     ResponseCurveComponent mAnalyzer;
     KnobLayout mAnalyzerLayout;
