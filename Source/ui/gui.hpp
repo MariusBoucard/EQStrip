@@ -63,5 +63,5 @@ void RootViewComponent::configureNodes(juce::AudioProcessor& inProcessor)
 
 	mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);
 	addAndMakeVisible(mEQStrip);
-	mEQStrip.setScale(mScale);
+
 }

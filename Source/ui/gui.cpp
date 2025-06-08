@@ -7,8 +7,9 @@ RootViewComponent::RootViewComponent(juce::AudioProcessor& processor)
     : AudioProcessorEditor(processor)
     , mProcessor(processor)
     , mTopBar(processor)
-    , mEQStrip(processor)
-, mAnalyzer(mProcessor,dynamic_cast<SkeletonAudioProcessor&>(processor).getCustomParameterTree(),dynamic_cast<SkeletonAudioProcessor&>(processor).getParameterSetup())
+    , mEQStrip(processor,180,670)
+    , mScale(0.5f)
+    , mAnalyzer(mProcessor,dynamic_cast<SkeletonAudioProcessor&>(processor).getCustomParameterTree(),dynamic_cast<SkeletonAudioProcessor&>(processor).getParameterSetup())
 {
     auto imageData = BinaryData::plate_png;
     auto imageDataSize = BinaryData::plate_pngSize;
@@ -23,7 +24,6 @@ RootViewComponent::RootViewComponent(juce::AudioProcessor& processor)
 
     int maxHeight = 900;
     int maxWidth  = static_cast<int>(maxHeight * aspectRatio);
-    mScale = 0.5f;
 
     setResizable(true, true);
     setResizeLimits(minWidth, minHeight, maxWidth, maxHeight);
@@ -103,4 +103,5 @@ void RootViewComponent::resized()
     computeKnobLayout(mEQStripLayout);
     mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);
     mEQStrip.setScale(mScale);
+    mEQStrip.resized();
 }
