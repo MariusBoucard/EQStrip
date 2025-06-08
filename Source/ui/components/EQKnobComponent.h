@@ -27,14 +27,11 @@ class EQKnobComponent : public juce::Component
 public:
     EQKnobComponent(juce::AudioProcessor& processor)
         : mProcessor(processor)
-    , mScale(0.5)
-    {
+    , mScale(0.5) {
         mBell1Freq.setRange(500.f, 3000.0f); // Example, adapt to your parameter range
         defineKnobLayout();
         configureNodes(processor);
         setSliderAttachement(processor);
-
-
     }
 
     ~EQKnobComponent() override
@@ -62,6 +59,7 @@ public:
     void setScale(int inScale) {
         mScale = inScale;
     }
+
     void resized() override
     {
         auto buttonSize = getHeight();

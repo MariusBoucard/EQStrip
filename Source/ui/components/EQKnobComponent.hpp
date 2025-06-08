@@ -33,8 +33,5 @@ void EQKnobComponent::configureNodes(juce::AudioProcessor& inProcessor)
 	look->setImage(BinaryData::GainKnob_png, BinaryData::GainKnob_pngSize);
 	mBell1Freq.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 
-
-
-addAndMakeVisible(mBell1Freq);
-
+	addAndMakeVisible(mBell1Freq);
 }

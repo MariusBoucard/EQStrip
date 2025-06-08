@@ -99,5 +99,8 @@ void RootViewComponent::resized()
     computeKnobLayout(mAnalyzerLayout);
     mAnalyzer.setBounds(mAnalyzerLayout.outLayout.x,mAnalyzerLayout.outLayout.y,mAnalyzerLayout.outLayout.sliderWidth,mAnalyzerLayout.outLayout.sliderHeight);
 
-
+    mEQStripLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mEQStripLayout);
+    mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);
+    mEQStrip.setScale(mScale);
 }
