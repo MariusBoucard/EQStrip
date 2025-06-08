@@ -44,7 +44,7 @@ public:
         std::vector<std::unique_ptr<juce::RangedAudioParameter> > params;
         auto attributes = juce::AudioParameterFloatAttributes()
                 .withStringFromValueFunction([](float value, int) {
-                    return juce::String(value);
+                    return juce::String(value)+" dB";
                 })
                 .withLabel(" dB");
 
@@ -67,7 +67,7 @@ public:
 
         auto attrQ = juce::AudioParameterFloatAttributes()
                 .withStringFromValueFunction([](float value, int) {
-                    return juce::String(value, 2); // 2 decimal places
+                    return juce::String(value, 2)+" Q";
                 })
                 .withValueFromStringFunction(juce::AudioParameterFloatAttributes::ValueFromString(
                     [](const juce::String &text) -> float {
@@ -90,11 +90,10 @@ public:
                                                                      attributes));
 
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
-            juce::ParameterID{"HPF_Freq", 1}, // Parameter ID and version hint
+            juce::ParameterID{"HPF_Freq", 1},
             "HPF Frequency", // Parameter Name
             juce::NormalisableRange<float>(20.0f, 300.0f, 1.0f, 0.3f),
-            // Range (min, max, interval, skewFactor for log-like response)
-            80.0f, // Default value
+            80.0f,
             attrFreq
         ));
 
@@ -106,8 +105,6 @@ public:
             attrQ
         ));
 
-        // ** Knob 2: Bell Filter 1 (Mid1) **
-        // Parameters: Frequency, Gain, Q
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
             juce::ParameterID{"Bell1_Freq", 1},
             "Bell 1 Frequency",
@@ -132,7 +129,7 @@ public:
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
             juce::ParameterID{"Bell2_Freq", 1},
             "Bell 2 Freq",
-            juce::NormalisableRange<float>(500.f, 12000.0f, 1.f, 3.f),
+            juce::NormalisableRange<float>(500.f, 12000.0f, 1.f, 0.3f),
             1.0f,
             attrFreq
         ));
@@ -152,13 +149,11 @@ public:
             attrQ
         ));
 
-        // ** Knob 4: High-Shelf Filter (HSF) **
-        // Parameters: Frequency, Gain, Q (can also be interpreted as Slope for shelves)
+
         params.push_back(std::make_unique<juce::AudioParameterFloat>(
             juce::ParameterID{"HS_Freq", 1},
             "High-Shelf Frequency",
             juce::NormalisableRange<float>(1000.0f, 20000.0f, 1.0f, 0.35f),
-            // Slightly different skew might feel better for shelves
             8000.0f,
             attrFreq
         ));
@@ -196,7 +191,7 @@ public:
     }
     bool hasEditor() const override                        { return true;   }
 
-    const String getName() const override                  { return "Template"; }
+    const String getName() const override                  { return "EQStrip"; }
     bool acceptsMidi() const override                      { return false; }
     bool producesMidi() const override                     { return false; }
     double getTailLengthSeconds() const override           { return 0; }
@@ -217,7 +212,13 @@ public:
 
     void setStateInformation (const void* data, int sizeInBytes) override
     {
+        juce::ValueTree tree = juce::ValueTree::readFromData(data, static_cast<size_t>(sizeInBytes));
 
+        if (tree.isValid())
+        {
+            mParameters.replaceState(tree);
+            mParameterSetup.initializeParameters();
+        }
     }
 
     bool isBusesLayoutSupported (const BusesLayout& layouts) const override

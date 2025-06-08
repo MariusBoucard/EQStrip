@@ -1,13 +1,22 @@
 void RootViewComponent::defineKnobLayout()
 {
-    mGainKnobLayout.inLayout.x = 15;
-    mGainKnobLayout.inLayout.y = 495;
-    mGainKnobLayout.inLayout.frameWidth = 160;
-    mGainKnobLayout.inLayout.frameHeight = 192;
-    mGainKnobLayout.inLayout.ratio = mScale;
-    mGainKnobLayout.inLayout.textboxHeight = 0;
-    mGainKnobLayout.inLayout.textboxPadding = 0;
-    computeKnobLayout(mGainKnobLayout);
+    mInputGainKnobLayout.inLayout.x = 15;
+    mInputGainKnobLayout.inLayout.y = 495;
+    mInputGainKnobLayout.inLayout.frameWidth = 160;
+    mInputGainKnobLayout.inLayout.frameHeight = 192;
+    mInputGainKnobLayout.inLayout.ratio = mScale;
+    mInputGainKnobLayout.inLayout.textboxHeight = 0;
+    mInputGainKnobLayout.inLayout.textboxPadding = 0;
+    computeKnobLayout(mInputGainKnobLayout);
+
+	mOutputGainKnobLayout.inLayout.x = 1725;
+	mOutputGainKnobLayout.inLayout.y = 507;
+	mOutputGainKnobLayout.inLayout.frameWidth = 186;
+	mOutputGainKnobLayout.inLayout.frameHeight = 164;
+	mOutputGainKnobLayout.inLayout.ratio = mScale;
+	mOutputGainKnobLayout.inLayout.textboxHeight = 0;
+	mOutputGainKnobLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mOutputGainKnobLayout);
 
 	mTopBarLayout.inLayout.x = 0;
 	mTopBarLayout.inLayout.y = 0;
@@ -29,7 +38,7 @@ void RootViewComponent::defineKnobLayout()
 
 	mEQStripLayout.inLayout.x = 180;
 	mEQStripLayout.inLayout.y = 670;
-	mEQStripLayout.inLayout.frameWidth = 1580;
+	mEQStripLayout.inLayout.frameWidth = 1650;
 	mEQStripLayout.inLayout.frameHeight = 380;
 	mEQStripLayout.inLayout.ratio = mScale;
 	mEQStripLayout.inLayout.textboxHeight = 0;
@@ -44,21 +53,14 @@ void RootViewComponent::configureNodes(juce::AudioProcessor& inProcessor)
 
     setSliderAttachement(inProcessor);
 
-	mGainKnob.setBounds(mGainKnobLayout.outLayout.x,
-         		mGainKnobLayout.outLayout.y,
-         		mGainKnobLayout.outLayout.sliderWidth,
-         		mGainKnobLayout.outLayout.sliderHeight);
-	mGainKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-	mGainKnob.setLookAndFeel(new KnobLookAndFeel());
-
-	auto look = dynamic_cast<KnobLookAndFeel*>(&mGainKnob.getLookAndFeel());
-	look->setImage(BinaryData::GainKnob_png, BinaryData::GainKnob_pngSize);
-	mGainKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+	configureKnob(mInputGainKnob, mInputGainKnobLayout,BinaryData::GainKnob_png, BinaryData::GainKnob_pngSize);
+	configureKnob(mOutputGainKnob, mOutputGainKnobLayout,BinaryData::outputGain_png, BinaryData::outputGain_pngSize);
 
 	mTopBar.setBounds(mTopBarLayout.outLayout.x,mTopBarLayout.outLayout.y,mTopBarLayout.outLayout.sliderWidth,mTopBarLayout.outLayout.sliderHeight);
 	mAnalyzer.setBounds(mAnalyzerLayout.outLayout.x,mAnalyzerLayout.outLayout.y,mAnalyzerLayout.outLayout.sliderWidth,mAnalyzerLayout.outLayout.sliderHeight);
 	addAndMakeVisible(mTopBar);
-	addAndMakeVisible(mGainKnob);
+	addAndMakeVisible(mInputGainKnob);
+	addAndMakeVisible(mOutputGainKnob);
 	addAndMakeVisible(mAnalyzer);
 
 	mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);

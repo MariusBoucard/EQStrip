@@ -46,8 +46,8 @@ RootViewComponent::~RootViewComponent()
 void RootViewComponent::setSliderAttachement(AudioProcessor& inProcessor)
 {
     SkeletonAudioProcessor* processor = dynamic_cast<SkeletonAudioProcessor*>(&inProcessor);
-    mGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "inputGain", mGainKnob);
-
+    mInputGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "inputGain", mInputGainKnob);
+    mOutputGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "outputGain", mOutputGainKnob);
 
 }
 
@@ -87,10 +87,13 @@ void RootViewComponent::resized()
     auto imageBounds = mImage.getBounds().toFloat();
     mScale = juce::jmin(bounds.getWidth() / imageBounds.getWidth(),
                             bounds.getHeight() / imageBounds.getHeight());
-    mGainKnobLayout.inLayout.ratio = mScale;
-    computeKnobLayout(mGainKnobLayout);
-    mGainKnob.setBounds(mGainKnobLayout.outLayout.x,mGainKnobLayout.outLayout.y,mGainKnobLayout.outLayout.sliderWidth,mGainKnobLayout.outLayout.sliderHeight);
+    mInputGainKnobLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mInputGainKnobLayout);
+    mInputGainKnob.setBounds(mInputGainKnobLayout.outLayout.x,mInputGainKnobLayout.outLayout.y,mInputGainKnobLayout.outLayout.sliderWidth,mInputGainKnobLayout.outLayout.sliderHeight);
 
+    mOutputGainKnobLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mOutputGainKnobLayout);
+    mOutputGainKnob.setBounds(mOutputGainKnobLayout.outLayout.x,mOutputGainKnobLayout.outLayout.y,mOutputGainKnobLayout.outLayout.sliderWidth,mOutputGainKnobLayout.outLayout.sliderHeight);
     mTopBarLayout.inLayout.ratio = mScale;
     computeKnobLayout(mTopBarLayout);
     mTopBar.setBounds(mTopBarLayout.outLayout.x,mTopBarLayout.outLayout.y,mTopBarLayout.outLayout.sliderWidth,mTopBarLayout.outLayout.sliderHeight);

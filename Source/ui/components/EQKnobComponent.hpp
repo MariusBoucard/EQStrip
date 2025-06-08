@@ -19,15 +19,14 @@ void EQKnobComponent::defineKnobLayout()
 	mLCFreqLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mLCFreqLayout);
 
-	mBell1QLayout.inLayout.x = 700 - mPositionInParent.x;
-    mBell1QLayout.inLayout.y = 741 - mPositionInParent.y;
+	mBell1QLayout.inLayout.x = 770 - mPositionInParent.x;
+    mBell1QLayout.inLayout.y = 800 - mPositionInParent.y;
  	mBell1QLayout.inLayout.frameWidth = 188;
 	mBell1QLayout.inLayout.frameHeight = 159;
 	mBell1QLayout.inLayout.ratio = mScale;
 	mBell1QLayout.inLayout.textboxHeight = 0;
 	mBell1QLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mBell1QLayout);
-
 
     mBell1FreqLayout.inLayout.x = 457 - mPositionInParent.x;
     mBell1FreqLayout.inLayout.y = 741 - mPositionInParent.y;
@@ -115,13 +114,13 @@ void EQKnobComponent::setSliderAttachement(AudioProcessor& inProcessor)
 	mLcQAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HPF_Q", mLCQ);
 	mLcFreqAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HPF_Freq", mLCFreq);
 	mBell1QAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell1_Q", mBell1Q);
- mBell1GainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell1_Gain", mBell1Gain);
-mBell2QAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Q", mBell2Q);
-mBell2FreqAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Freq", mBell2Freq);
-mBell2GainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Gain", mBell2Gain);
-mHSGainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Gain", mHSGain);
-mHSFreqAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Freq", mHSFreq);
-mHSQAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Q", mHSQ);
+	 mBell1GainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell1_Gain", mBell1Gain);
+	mBell2QAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Q", mBell2Q);
+	mBell2FreqAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Freq", mBell2Freq);
+	mBell2GainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "Bell2_Gain", mBell2Gain);
+	mHSGainAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Gain", mHSGain);
+	mHSFreqAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Freq", mHSFreq);
+	mHSQAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "HS_Q", mHSQ);
 
 }
 
@@ -140,7 +139,6 @@ void EQKnobComponent::configureNodes(juce::AudioProcessor& inProcessor)
 	configureKnob(mBell2Freq, mBell2FreqLayout, BinaryData::Bell2Freq_png, BinaryData::Bell2Freq_pngSize);
 	configureKnob(mBell1Freq, mBell1FreqLayout, BinaryData::Bell1Freq_png, BinaryData::Bell1Freq_pngSize);
 
-
 	configureKnob(mHSGain, mHSGainLayout, BinaryData::HSGain_png, BinaryData::HSGain_pngSize);
 	configureKnob(mHSFreq, mHSFreqLayout, BinaryData::HSFreq_png, BinaryData::HSFreq_pngSize);
 	configureKnob(mHSQ, mHSQLayout, BinaryData::HSq_png, BinaryData::HSq_pngSize);
@@ -158,6 +156,6 @@ void EQKnobComponent::configureKnob(juce::Slider& inKnob, KnobLayout& inLayout, 
 	auto look = dynamic_cast<KnobLookAndFeel*>(&inKnob.getLookAndFeel());
 	look->setImage(inImage, inImageSize);
 	inKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
-
+	inKnob.setPopupDisplayEnabled(true,true, this);
 	addAndMakeVisible(inKnob);
 }

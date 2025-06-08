@@ -35,6 +35,19 @@ public:
     ~RootViewComponent() override;  
 
     void setSliderAttachement(juce::AudioProcessor& inProcessor);
+
+    void configureKnob(juce::Slider& inKnob, KnobLayout& inLayout, const void* inImage, int inImageSize)
+    {
+        inKnob.setBounds(inLayout.outLayout.x,inLayout.outLayout.y,inLayout.outLayout.sliderWidth,inLayout.outLayout.sliderHeight);
+        inKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
+        inKnob.setLookAndFeel(new KnobLookAndFeel());
+        auto look = dynamic_cast<KnobLookAndFeel*>(&inKnob.getLookAndFeel());
+        look->setImage(inImage, inImageSize);
+        inKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
+        inKnob.setPopupDisplayEnabled(true,true, this);
+        addAndMakeVisible(inKnob);
+    }
+
     void computeKnobLayout(KnobLayout& inKnobLayout)
     {
 
@@ -57,9 +70,13 @@ private:
     ToggleButtonLookAndFeel mToggleLookAndFeel;
     float mScale;
 
-    juce::Slider mGainKnob;
-    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mGainKnobAttachement;
-    KnobLayout mGainKnobLayout;
+    juce::Slider mInputGainKnob;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mInputGainKnobAttachement;
+    KnobLayout mInputGainKnobLayout;
+
+    juce::Slider mOutputGainKnob;
+    std::unique_ptr<juce::AudioProcessorValueTreeState::SliderAttachment> mOutputGainKnobAttachement;
+    KnobLayout mOutputGainKnobLayout;
 
     TopBarComponent mTopBar;
     KnobLayout mTopBarLayout;
