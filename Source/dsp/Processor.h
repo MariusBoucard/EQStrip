@@ -3,6 +3,7 @@
 #include <random>
 #include "Processor.hpp"
 #include "Bones/FilterCell.h"
+#include "OutputData.h"
 //==============================================================================
 class SkeletonAudioProcessor final : public AudioProcessor {
 public:
@@ -25,6 +26,7 @@ public:
                                               mBlockSize);
         initialiseGraph();
         mProcessorGraph.rebuild();
+        mLeftChannelFifo.prepare(mBlockSize);
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
         mParameterSetup.initializeParameters();
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);
@@ -142,6 +144,10 @@ public:
 
     }
 
+    SingleChannelSampleFifo<float> &getLeftChannelFifo() {
+        return mLeftChannelFifo;
+    }
+
 private:
     //==============================================================================
     juce::AudioProcessorValueTreeState &mParameters;
@@ -164,6 +170,8 @@ private:
     juce::AudioProcessorGraph::Node::Ptr mBellNode1;
     juce::AudioProcessorGraph::Node::Ptr mBellNode2;
     juce::AudioProcessorGraph::Node::Ptr mHShelfNode;
+
+    SingleChannelSampleFifo<float> mLeftChannelFifo {Channel::Left};
 
     double mBlockSize;
     double mSampleRate;

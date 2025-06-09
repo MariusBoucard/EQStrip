@@ -3,7 +3,7 @@
 #include "../dsp/Processor.h"
 #include <JuceHeader.h>
 
-RootViewComponent::RootViewComponent(juce::AudioProcessor& processor)
+RootViewComponent::RootViewComponent(SkeletonAudioProcessor& processor)
     : AudioProcessorEditor(processor)
     , mProcessor(processor)
     , mTopBar(processor)

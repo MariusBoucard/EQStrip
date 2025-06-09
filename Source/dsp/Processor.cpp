@@ -58,5 +58,8 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
         auto inGain = std::pow(10.0f, (gainInDecibels) / 20.0f); // If we can migrate this pow to mappers
         inBuffer.applyGain(inGain);
     }
+
+    // Metering
     updateMeter(true, inBuffer, inBuffer.getNumSamples(), getTotalNumOutputChannels());
+    leftChannelFifo.update(inBuffer);
 }

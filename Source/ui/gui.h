@@ -31,7 +31,7 @@ public:
         output outLayout;
     };
 
-    RootViewComponent(juce::AudioProcessor& processor);
+    RootViewComponent(SkeletonAudioProcessor& processor);
     ~RootViewComponent() override;  
 
     void setSliderAttachement(juce::AudioProcessor& inProcessor);
@@ -63,7 +63,7 @@ public:
 
 private:
     juce::Image mImage;
-    juce::AudioProcessor& mProcessor;
+    SkeletonAudioProcessor& mProcessor;
 
     KnobLookAndFeel mKnobLookAndFeel; 
     DropDownLookAndFeel mDropDownLookAndFeel; 

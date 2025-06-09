@@ -1,10 +1,13 @@
 #include "AnalyzerComponent.h"
-ResponseCurveComponent::ResponseCurveComponent(juce::AudioProcessor &p, juce::AudioProcessorValueTreeState& inParams,ParameterSetup& inParameterSetup) : mProcessor(p),
-                                                                            mParameters(inParams),
-                                                                            mParameterSetup(inParameterSetup)
-                                                                            // leftPathProducer(mProcessor.leftChannelFifo),
+
+#include "../../dsp/Processor.h"
+
+ResponseCurveComponent::ResponseCurveComponent(SkeletonAudioProcessor &p, juce::AudioProcessorValueTreeState& inParams,ParameterSetup& inParameterSetup) : mProcessor(p),
+                                                                                                                                          mParameters(inParams),
+                                                                                                                                          mParameterSetup(inParameterSetup),
+                                                                                                                                          mLeftPathProducer(mProcessor.getLeftChannelFifo())
                                                                             // rightPathProducer(mProcessor.rightChannelFifo)
-// leftChannelFifo(&audioProcessor.leftChannelFifo)
+ //leftChannelFifo(&audioProcessor.leftChannelFifo)
 {
   const auto &params = mProcessor.getParameters();
   for (auto param : params)
@@ -13,7 +16,6 @@ ResponseCurveComponent::ResponseCurveComponent(juce::AudioProcessor &p, juce::Au
   }
 
   updateChain();
-  // dont forget it otherwise s actiove pas
   startTimerHz(60);
 }
 
@@ -31,66 +33,65 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 }
 
 //===========================Lets move from timer calleback in here
-// void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
-// {
-//   // FFT START HERE SEEMS HARDDDD
-//   juce::AudioBuffer<float> tempIncomingBuffer;
-//
-//   while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
-//   {
-//     if (leftChannelFifo->getAudioBuffer(tempIncomingBuffer))
-//     {
-//       auto size = tempIncomingBuffer.getNumSamples();
-//       // On commence a ecrire dans monobuffer en 0, on copy ce qu'il y a depuis size, puis on copie tout le reste - size car on va pas plus loin
-//       juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
-//                                         monoBuffer.getReadPointer(0, size),
-//                                         monoBuffer.getNumSamples() - size);
-//
-//       // Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
-//       juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
-//                                         tempIncomingBuffer.getReadPointer(0, 0),
-//                                         size);
-//
-//       leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
-//     }
-//   }
+void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
+{
+  // FFT START HERE SEEMS HARDDDD
+  juce::AudioBuffer<float> tempIncomingBuffer;
+
+  while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
+  {
+    if (leftChannelFifo->getAudioBuffer(tempIncomingBuffer))
+    {
+      auto size = tempIncomingBuffer.getNumSamples();
+      // On commence a ecrire dans monobuffer en 0, on copy ce qu'il y a depuis size, puis on copie tout le reste - size car on va pas plus loin
+      juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
+                                        monoBuffer.getReadPointer(0, size),
+                                        monoBuffer.getNumSamples() - size);
+
+      // Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
+      juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+                                        tempIncomingBuffer.getReadPointer(0, 0),
+                                        size);
+
+      leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
+    }
+  }
 
   /**
    *  if there are FFt data to pull
    * if we can pull a buffer then generate a path
    */
-  // const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
+  const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
   //
   // /*
   // 48000/2048 = 23 hz : this is the binwidth
   // */
-  // const auto binWidth = sampleRate / (double)fftSize;
-  //
-  // while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
-  // {
-  //   std::vector<float> fftData;
-  //   if (leftChannelFFTDataGenerator.getFFTData(fftData))
-  //   {
-  //     pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
-  //   }
-  // }
+  const auto binWidth = sampleRate / (double)fftSize;
+
+  while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
+  {
+    std::vector<float> fftData;
+    if (leftChannelFFTDataGenerator.getFFTData(fftData))
+    {
+      pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+    }
+  }
 
   /**
    * while there are path that can be pull, pull as many as we can
    * we only display the most recent one
    */
-//   while (pathProducer.getNumPathsAvailable())
-//   {
-//     pathProducer.getPath(leftChannelFFTPath);
-//   }
-// }
+  while (pathProducer.getNumPathsAvailable())
+  {
+    pathProducer.getPath(leftChannelFFTPath);
+  }
+}
 void ResponseCurveComponent::timerCallback()
 {
   if(shouldShowFFTAnalisis){
       auto fftBounds = getAnalysisArea().toFloat();
-  auto sampleRate = mProcessor.getSampleRate();
-  // leftPathProducer.process(fftBounds, sampleRate);
-  // rightPathProducer.process(fftBounds, sampleRate);
+      auto sampleRate = mProcessor.getSampleRate();
+      mLeftPathProducer.process(fftBounds, sampleRate);
   }
 
 
@@ -123,8 +124,6 @@ void ResponseCurveComponent::updateChain()
 void ResponseCurveComponent::paint(juce::Graphics &g)
 {
   using namespace juce;
-  // (Our component is opaque, so we must completely fill the background with a solid colour)
-  // g.fillAll(Colours::black);
   updateChain();
 
   g.drawImage(background, getLocalBounds().toFloat());
