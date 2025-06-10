@@ -71,7 +71,8 @@ struct FFTDataGenerator
             fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
         }
 
-      //  fftDataFifo.push(fftData); // Push the std::vector<float> to the FIFO
+        mCurrentFFT = fftData;
+      //fftDataFifo.push(fftData); // Push the std::vector<float> to the FIFO
     }
 
     void changeOrder(FFTOrder newOrder)
@@ -94,6 +95,7 @@ struct FFTDataGenerator
     //==============================================================================
     int getFFTSize() const { return 1 << 3; }
      int getNumAvailableFFTDataBlocks() const { return fftDataFifo.getNumAvailableForReading(); }
+    std::vector<float> getFFTData() const { return fftData; }
     //==============================================================================
     bool getFFTData(BlockType& dataToFill) { return false; // fftDataFifo.pull(dataToFill);
         }
@@ -105,6 +107,7 @@ private:
 
     // Assuming AudioBufferFifo is templated to store std::vector<float>
     // or that it can handle a BlockType that is compatible with std::vector<float>
+    std::vector<float> mCurrentFFT;
     AudioBufferFifo fftDataFifo; // The FIFO now stores std::vector<float>
 };
 
@@ -154,6 +157,7 @@ struct AnalyzerPathGenerator
                 p.lineTo(binX, y);
             }
         }
+        mPath = p;
 
        // pathFifo.push(p);
     }
@@ -165,12 +169,18 @@ struct AnalyzerPathGenerator
     }
 
 
+    PathType getPath() const
+    {
+        return mPath;
+    }
+
     bool getPath(PathType& path)
     {
         return false;//pathFifo.pull(path);
     }
 private:
     AudioBufferFifo pathFifo;
+    PathType mPath;
 };
 
 
@@ -182,7 +192,7 @@ struct PathProducer {
 
     void process(juce::Rectangle<float> fftBounds, double sampleRate);
 
-    juce::Path getPath() const { return leftChannelFFTPath; }
+    juce::Path getPath() const { return pathProducer.getPath(); }
 
 private:
     SingleChannelSampleFifo *leftChannelFifo;

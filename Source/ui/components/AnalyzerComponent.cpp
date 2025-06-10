@@ -37,7 +37,6 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
   // FFT START HERE SEEMS HARDDDD
   juce::AudioBuffer<float> tempIncomingBuffer;
-  juce::AudioBuffer<float>& monoBuffer = tempIncomingBuffer;
 
   while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
   {
@@ -69,14 +68,10 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
   // */
   const auto binWidth = sampleRate / (double)fftSize;
 
-  while (leftChannelFFTDataGenerator.getNumAvailableFFTDataBlocks() > 0)
-  {
-    std::vector<float> fftData;
-    if (leftChannelFFTDataGenerator.getFFTData(fftData))
-    {
+  auto fftData = leftChannelFFTDataGenerator.getFFTData();
+    if (fftData.data()) {
       pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
     }
-  }
 
   /**
    * while there are path that can be pull, pull as many as we can
@@ -127,7 +122,7 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
   using namespace juce;
   updateChain();
 
-  g.drawImage(background, getLocalBounds().toFloat());
+  // g.drawImage(background, getLocalBounds().toFloat());
   auto responseArea = getAnalysisArea();
   auto w = responseArea.getWidth();
   auto sampleRate = 44100.0;
@@ -167,6 +162,35 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
 
   g.setColour(juce::Colours::red);
   g.strokePath(responseCurve, juce::PathStrokeType(2.f));
+
+  g.setColour(juce::Colours::red);
+  juce::Path leftPath;
+  leftPath = mLeftPathProducer.getPath();
+  juce::Rectangle<float> pathBounds = leftPath.getBounds();
+
+  // Check if the bounds are valid (not containing NaNs or infinities)
+  if (! pathBounds.getWidth() > 0.0f || ! pathBounds.getHeight() > 0.0f ||
+      ! pathBounds.getX() == pathBounds.getX() || // check for NaN
+      ! pathBounds.getY() == pathBounds.getY())   // check for NaN
+  {
+    DBG("Left path has invalid or zero-sized bounds!");
+    DBG("Bounds: " << pathBounds.toString()); // Log the bounds for debugging
+    // You might want to skip drawing or draw a warning here
+    return;
+  }
+
+
+  // You could also check if the path is entirely off-screen
+  // juce::Rectangle<float> localBounds = getLocalBounds().toFloat();
+  // if (! localBounds.intersects(pathBounds))
+  // {
+  //     DBG("Left path is completely off-screen!");
+  //     return;
+  // }
+
+
+  g.strokePath(leftPath, juce::PathStrokeType(2.f));
+  g.strokePath(mLeftPathProducer.getPath(), juce::PathStrokeType(2.f));
 }
 
 void ResponseCurveComponent::resized()
@@ -257,8 +281,8 @@ void ResponseCurveComponent::resized()
     r.setX(getWidth() - textWidth);
     r.setCentre(r.getCentreX(), y);
 
-    g.setColour(db == 0.f ? Colours::purple : Colours::lightgrey);
-    g.drawFittedText(str, r, juce::Justification::centred, 1);
+    // g.setColour(db == 0.f ? Colours::purple : Colours::lightgrey);
+    // g.drawFittedText(str, r, juce::Justification::centred, 1);
 
     str.clear();
     str << (db - 24.f);
