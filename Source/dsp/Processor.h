@@ -144,7 +144,7 @@ public:
 
     }
 
-    SingleChannelSampleFifo<float> &getLeftChannelFifo() {
+    SingleChannelSampleFifo &getLeftChannelFifo() {
         return mLeftChannelFifo;
     }
 
@@ -171,7 +171,7 @@ private:
     juce::AudioProcessorGraph::Node::Ptr mBellNode2;
     juce::AudioProcessorGraph::Node::Ptr mHShelfNode;
 
-    SingleChannelSampleFifo<float> mLeftChannelFifo {Channel::Left};
+    SingleChannelSampleFifo mLeftChannelFifo {Channel::Left};
 
     double mBlockSize;
     double mSampleRate;

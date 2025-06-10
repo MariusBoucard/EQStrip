@@ -33,74 +33,75 @@ struct FFTDataGenerator
      */
     void produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
     {
-        const auto fftSize = getFFTSize();
+        // const auto fftSize = getFFTSize();
+        //
+        // fftData.assign(fftData.size(), 0);
+        // auto* readIndex = audioData.getReadPointer(0);
+        // std::copy(readIndex, readIndex + fftSize, fftData.begin());
+        //
+        // // first apply a windowing function to our data
+        // window->multiplyWithWindowingTable (fftData.data(), fftSize);       // [1]
+        //
+        // // then render our FFT data..
+        // forwardFFT->performFrequencyOnlyForwardTransform (fftData.data());  // [2]
+        //
+        // int numBins = (int)fftSize / 2;
+        //
+        // //normalize the fft values.
+        // for( int i = 0; i < numBins; ++i )
+        // {
+        //     auto v = fftData[i];
+        //     fftData[i] /= (float) numBins;
+        //     if( !std::isinf(v) && !std::isnan(v) )
+        //     {
+        //         v /= float(numBins);
+        //     }
+        //     else
+        //     {
+        //         v = 0.f;
+        //     }
+        //     fftData[i] = v;
+        // }
+        //
+        // //convert them to decibels
+        // for( int i = 0; i < numBins; ++i )
+        // {
+        //     fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
+        // }
 
-        fftData.assign(fftData.size(), 0);
-        auto* readIndex = audioData.getReadPointer(0);
-        std::copy(readIndex, readIndex + fftSize, fftData.begin());
-
-        // first apply a windowing function to our data
-        window->multiplyWithWindowingTable (fftData.data(), fftSize);       // [1]
-
-        // then render our FFT data..
-        forwardFFT->performFrequencyOnlyForwardTransform (fftData.data());  // [2]
-
-        int numBins = (int)fftSize / 2;
-
-        //normalize the fft values.
-        for( int i = 0; i < numBins; ++i )
-        {
-            auto v = fftData[i];
-            fftData[i] /= (float) numBins;
-            if( !std::isinf(v) && !std::isnan(v) )
-            {
-                v /= float(numBins);
-            }
-            else
-            {
-                v = 0.f;
-            }
-            fftData[i] = v;
-        }
-
-        //convert them to decibels
-        for( int i = 0; i < numBins; ++i )
-        {
-            fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
-        }
-
-        fftDataFifo.push(fftData);
+      //  fftDataFifo.push(fftData);
     }
 
     void changeOrder(FFTOrder newOrder)
     {
-        //when you change order, recreate the window, forwardFFT, fifo, fftData
-        //also reset the fifoIndex
-        //things that need recreating should be created on the heap via std::make_unique<>
+        // //when you change order, recreate the window, forwardFFT, fifo, fftData
+        // //also reset the fifoIndex
+        // //things that need recreating should be created on the heap via std::make_unique<>
+        //
+        // order = newOrder;
+        // auto fftSize = getFFTSize();
+        //
+        // forwardFFT = std::make_unique<juce::dsp::FFT>(order);
+        // window = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
+        //
+        // fftData.clear();
+        // fftData.resize(fftSize * 2, 0);
 
-        order = newOrder;
-        auto fftSize = getFFTSize();
-
-        forwardFFT = std::make_unique<juce::dsp::FFT>(order);
-        window = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
-
-        fftData.clear();
-        fftData.resize(fftSize * 2, 0);
-
-        fftDataFifo.prepare(fftData.size());
+       // fftDataFifo.prepare(fftData.size());
     }
     //==============================================================================
     int getFFTSize() const { return 1 << order; }
      int getNumAvailableFFTDataBlocks() const { return fftDataFifo.getNumAvailableForReading(); }
     //==============================================================================
-    bool getFFTData(BlockType& fftData) { return fftDataFifo.pull(fftData); }
+    bool getFFTData(BlockType& fftData) { return false;// fftDataFifo.pull(fftData);
+        }
 private:
     FFTOrder order;
     BlockType fftData;
     std::unique_ptr<juce::dsp::FFT> forwardFFT;
     std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
 
-    Fifo<BlockType> fftDataFifo;
+    AudioBufferFifo fftDataFifo;
 };
 
 template<typename PathType>
@@ -150,7 +151,7 @@ struct AnalyzerPathGenerator
             }
         }
 
-        pathFifo.push(p);
+       // pathFifo.push(p);
     }
     
 
@@ -162,24 +163,24 @@ struct AnalyzerPathGenerator
 
     bool getPath(PathType& path)
     {
-        return pathFifo.pull(path);
+        return false;//pathFifo.pull(path);
     }
 private:
-    Fifo<PathType> pathFifo;
+    AudioBufferFifo pathFifo;
 };
 
 
 struct PathProducer{
-  PathProducer(SingleChannelSampleFifo<float>& scsf) :
+  PathProducer(SingleChannelSampleFifo& scsf) :
   leftChannelFifo(&scsf)
   {
-  leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
-  monoBuffer.setSize(1,leftChannelFFTDataGenerator.getFFTSize());
+      leftChannelFFTDataGenerator.changeOrder(FFTOrder::order4096);
+      monoBuffer.setSize(1,leftChannelFFTDataGenerator.getFFTSize());
   }
   void process(juce::Rectangle<float> fftBounds,double sampleRate);
   juce::Path getPath() const { return leftChannelFFTPath;}
   private:
-   SingleChannelSampleFifo<float>* leftChannelFifo;
+   SingleChannelSampleFifo* leftChannelFifo;
   juce::AudioBuffer<float> monoBuffer;
   FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
   AnalyzerPathGenerator<juce::Path> pathProducer;

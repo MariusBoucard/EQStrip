@@ -1,39 +1,30 @@
 #pragma once
 #include <JuceHeader.h>
 #include <array>
-template<typename T>
-struct Fifo
+// This should be thought again using juce buffers no ? Warning because of templating
+#pragma once
+#include <JuceHeader.h>
+#include <array>
+
+struct AudioBufferFifo
 {
     void prepare(int numChannels, int numSamples)
     {
-        static_assert( std::is_same_v<T, juce::AudioBuffer<float>>,
-                      "prepare(numChannels, numSamples) should only be used when the Fifo is holding juce::AudioBuffer<float>");
-        for( auto& buffer : buffers)
+        for (auto& buffer : buffers)
         {
             buffer.setSize(numChannels,
                            numSamples,
-                           false,   //clear everything?
-                           true,    //including the extra space?
-                           true);   //avoid reallocating if you can?
+                           false, // clear everything?
+                           true,  // including the extra space?
+                           true); // avoid reallocating?
             buffer.clear();
         }
     }
 
-    void prepare(size_t numElements)
-    {
-        static_assert( std::is_same_v<T, std::vector<float>>,
-                      "prepare(numElements) should only be used when the Fifo is holding std::vector<float>");
-        for( auto& buffer : buffers )
-        {
-            buffer.clear();
-            buffer.resize(numElements, 0);
-        }
-    }
-
-    bool push(const T& t)
+    bool push(const juce::AudioBuffer<float>& t)
     {
         auto write = fifo.write(1);
-        if( write.blockSize1 > 0 )
+        if (write.blockSize1 > 0)
         {
             buffers[write.startIndex1] = t;
             return true;
@@ -42,10 +33,10 @@ struct Fifo
         return false;
     }
 
-    bool pull(T& t)
+    bool pull(juce::AudioBuffer<float>& t)
     {
         auto read = fifo.read(1);
-        if( read.blockSize1 > 0 )
+        if (read.blockSize1 > 0)
         {
             t = buffers[read.startIndex1];
             return true;
@@ -58,33 +49,32 @@ struct Fifo
     {
         return fifo.getNumReady();
     }
+
 private:
     static constexpr int Capacity = 30;
-    std::array<T, Capacity> buffers;
-    juce::AbstractFifo fifo {Capacity};
+    std::array<juce::AudioBuffer<float>, Capacity> buffers;
+    juce::AbstractFifo fifo{ Capacity };
 };
+
 
 enum Channel
 {
     Right, //effectively 0
     Left //effectively 1
 };
-
-template<typename BlockType>
 struct SingleChannelSampleFifo
 {
-    SingleChannelSampleFifo(Channel ch) : channelToUse(ch)
-    {
+    SingleChannelSampleFifo(Channel ch) : channelToUse(ch) {
         prepared.set(false);
     }
 
     void update(const juce::AudioBuffer<float>& buffer)
     {
         jassert(prepared.get());
-        jassert(buffer.getNumChannels() > channelToUse );
+        jassert(buffer.getNumChannels() > channelToUse);
         auto* channelPtr = buffer.getReadPointer(channelToUse);
 
-        for( int i = 0; i < buffer.getNumSamples(); ++i )
+        for (int i = 0; i < buffer.getNumSamples(); ++i)
         {
             pushNextSampleIntoFifo(channelPtr[i]);
         }
@@ -95,26 +85,22 @@ struct SingleChannelSampleFifo
         prepared.set(false);
         size.set(bufferSize);
 
-        bufferToFill.setSize(1,             //channel
-                             bufferSize,    //num samples
-                             false,         //keepExistingContent
-                             true,          //clear extra space
-                             true);         //avoid reallocating
+        bufferToFill.setSize(1, bufferSize, false, true, true);
         audioBufferFifo.prepare(1, bufferSize);
         fifoIndex = 0;
         prepared.set(true);
     }
-    //==============================================================================
+
     int getNumCompleteBuffersAvailable() const { return audioBufferFifo.getNumAvailableForReading(); }
     bool isPrepared() const { return prepared.get(); }
     int getSize() const { return size.get(); }
-    //==============================================================================
-    bool getAudioBuffer(BlockType& buf) { return audioBufferFifo.pull(buf); }
+    bool getAudioBuffer(juce::AudioBuffer<float>& buf) { return audioBufferFifo.pull(buf); }
+
 private:
     Channel channelToUse;
     int fifoIndex = 0;
-    Fifo<BlockType> audioBufferFifo;
-    BlockType bufferToFill;
+    AudioBufferFifo audioBufferFifo;
+    juce::AudioBuffer<float> bufferToFill;
     juce::Atomic<bool> prepared = false;
     juce::Atomic<int> size = 0;
 
@@ -123,9 +109,7 @@ private:
         if (fifoIndex == bufferToFill.getNumSamples())
         {
             auto ok = audioBufferFifo.push(bufferToFill);
-
             juce::ignoreUnused(ok);
-
             fifoIndex = 0;
         }
 

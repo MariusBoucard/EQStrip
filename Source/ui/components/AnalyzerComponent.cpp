@@ -37,6 +37,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
 {
   // FFT START HERE SEEMS HARDDDD
   juce::AudioBuffer<float> tempIncomingBuffer;
+  juce::AudioBuffer<float>& monoBuffer = tempIncomingBuffer;
 
   while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
   {
@@ -44,16 +45,16 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
     {
       auto size = tempIncomingBuffer.getNumSamples();
       // On commence a ecrire dans monobuffer en 0, on copy ce qu'il y a depuis size, puis on copie tout le reste - size car on va pas plus loin
-      juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, 0),
-                                        monoBuffer.getReadPointer(0, size),
-                                        monoBuffer.getNumSamples() - size);
-
-      // Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
-      juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
-                                        tempIncomingBuffer.getReadPointer(0, 0),
-                                        size);
-
-      leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
+      // juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(1, 0),
+      //                                   monoBuffer.getReadPointer(1, size),
+      //                                   monoBuffer.getNumSamples() - size);
+      //
+      // // Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
+      // juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
+      //                                   tempIncomingBuffer.getReadPointer(0, 0),
+      //                                   size);
+      //
+      // leftChannelFFTDataGenerator.produceFFTDataForRendering(monoBuffer, -48.f);
     }
   }
 
