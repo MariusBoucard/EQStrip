@@ -59,7 +59,7 @@ private:
 
 enum Channel
 {
-    Right, //effectively 0
+    Right,
     Left //effectively 1
 };
 struct SingleChannelSampleFifo
