@@ -25,27 +25,6 @@ SkeletonAudioProcessor::~SkeletonAudioProcessor()
     mBellNode1 = nullptr;
     mBellNode2 = nullptr;
     mHShelfNode = nullptr;
-}  
-void SkeletonAudioProcessor::updateMeter(bool isOutput, AudioBuffer<float>& buffer,int numSamples,int numChannels)
-{
-    for (int channel = 0; channel < numChannels; ++channel)
-    {
-        auto* channelData = buffer.getReadPointer(channel);
-        float sum = 0.0f;
-
-        for (int i = 0; i < numSamples; ++i)
-        {
-            sum += channelData[i] * channelData[i];
-        }
-
-        float rms = std::sqrt(sum / numSamples);
-
-        if (channel == 0)
-        {
-            mRmsLevelLeft.store(rms);
-            mRmsLevelRight.store(rms);
-        }
-    }
 }
 
 void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuffer& inMidiBuffer)
@@ -56,6 +35,8 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
         auto inGain = std::pow(10.0f, (gainInDecibels) / 20.0f); // If we can migrate this pow to mappers
         inBuffer.applyGain(inGain);
     }
+    mRmsInputLevelLeft = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
+    mRmsInputLevelRight = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
 
     mProcessorGraph.processBlock(inBuffer, inMidiBuffer);
 
@@ -66,6 +47,7 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
     }
 
     // Metering
-    updateMeter(true, inBuffer, inBuffer.getNumSamples(), getTotalNumOutputChannels());
+    mRmsOutputLevelLeft = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
+    mRmsOutputLevelRight = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
     mAudioBufferFifo.push(inBuffer);
 }

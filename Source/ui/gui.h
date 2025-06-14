@@ -6,8 +6,9 @@
 #include <JuceHeader.h>
 #include "components/AnalyzerComponent.h"
 #include "components/EQKnobComponent.h"
+#include "components/VerticalMeterComponent.h"
 
-class RootViewComponent : public juce::AudioProcessorEditor
+class RootViewComponent : public juce::AudioProcessorEditor, public Timer
 {
 public:
     // SHOULD BE FZCTORIZED TODO
@@ -57,7 +58,7 @@ public:
         inKnobLayout.outLayout.x = inKnobLayout.inLayout.x*mScale;
         inKnobLayout.outLayout.y = inKnobLayout.inLayout.y *mScale;
 	}
-
+    void timerCallback() override;
     void updatePath();
     void paint(juce::Graphics& g) override;
     void resized() override;
@@ -85,6 +86,16 @@ private:
 
     EQKnobComponent mEQStrip;
     KnobLayout mEQStripLayout;
+
+    GUI::VerticalMeterComponent mInputMeterLeft;
+    GUI::VerticalMeterComponent mInputMeterRight;
+    KnobLayout mInputMeterLeftLayout;
+    KnobLayout mInputMeterRightLayout;
+
+    GUI::VerticalMeterComponent mOutputMeterLeft;
+    GUI::VerticalMeterComponent mOutputMeterRight;
+    KnobLayout mOutputMeterLeftLayout;
+    KnobLayout mOutputMeterRightLayout;
 
     ResponseCurveComponent mAnalyzer;
     KnobLayout mAnalyzerLayout;

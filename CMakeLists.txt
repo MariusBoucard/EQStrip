@@ -117,16 +117,16 @@ jucer_project_files("EQStrip/Source/ui/components"
   x         .         .         "Source/ui/components/TopBarComponent.cpp"
   x         .         .         "Source/ui/components/TopBarComponent.h"
   x         .         .         "Source/ui/components/AnalyzerComponent.h"
-    x         .         .         "Source/ui/components/AnalyzerComponent.cpp"
-
+  x         .         .         "Source/ui/components/AnalyzerComponent.cpp"
+  x         .         .         "Source/ui/components/VerticalMeterComponent.cpp"
+  x         .         .         "Source/ui/components/VerticalMeterComponent.h"
 )
 
 
 jucer_project_files("EQStrip/ressources/knob"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
-
-  .         x         x         "Source/ressources/knob/Bell1Freq.png"
+.         x         x         "Source/ressources/knob/Bell1Freq.png"
 .         x         x         "Source/ressources/knob/Bell1Gain.png"
 .         x         x         "Source/ressources/knob/GainKnob.png"
 .         x         x         "Source/ressources/knob/Bell2Freq.png"
@@ -138,7 +138,6 @@ jucer_project_files("EQStrip/ressources/knob"
 .         x         x         "Source/ressources/knob/HSGain.png"
 .         x         x         "Source/ressources/knob/HSq.png"
 .         x         x         "Source/ressources/knob/outputGain.png"
-
 )
 
 

@@ -38,8 +38,6 @@ public:
 
     void processBlock(AudioBuffer<float> &buffer, MidiBuffer &) override;
 
-    void updateMeter(bool isOutput, AudioBuffer<float> &buffer, int numSamples, int numChannels);
-
     //==============================================================================
     AudioProcessorEditor *createEditor() override {
         return nullptr;
@@ -66,8 +64,8 @@ public:
     }
 
 
-    double getRmsLevelLeft() const { return mRmsLevelLeft.load(); }
-    double getRmsLevelRight() const { return mRmsLevelRight.load(); }
+    double getRmsInputLevelLeft() const { return mRmsInputLevelLeft.load(); }
+    double getRmsInputLevelRight() const { return mRmsInputLevelLeft.load(); }
     double getRmsOutputLevelLeft() const { return mRmsOutputLevelLeft.load(); }
     double getRmsOutputLevelRight() const { return mRmsOutputLevelRight.load(); }
     ParameterSetup& getParameterSetup() { return mParameterSetup; }
@@ -154,8 +152,8 @@ private:
     ParameterSetup &mParameterSetup;
 
 private:
-    std::atomic<float> mRmsLevelLeft{0.0f};
-    std::atomic<float> mRmsLevelRight{0.0f};
+    std::atomic<float> mRmsInputLevelLeft{0.0f};
+    std::atomic<float> mRmsInputLevelRight{0.0f};
     std::atomic<float> mRmsOutputLevelLeft{0.0f};
     std::atomic<float> mRmsOutputLevelRight{0.0f};
 

@@ -44,6 +44,43 @@ void RootViewComponent::defineKnobLayout()
 	mEQStripLayout.inLayout.textboxHeight = 0;
 	mEQStripLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mEQStripLayout);
+
+	mInputMeterLeftLayout.inLayout.x = 75;
+	mInputMeterLeftLayout.inLayout.y = 250;
+	mInputMeterLeftLayout.inLayout.frameWidth = 20;
+	mInputMeterLeftLayout.inLayout.frameHeight = 230;
+	mInputMeterLeftLayout.inLayout.ratio = mScale;
+	mInputMeterLeftLayout.inLayout.textboxHeight = 0;
+	mInputMeterLeftLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mInputMeterLeftLayout);
+
+	mInputMeterRightLayout.inLayout.x = 100;
+	mInputMeterRightLayout.inLayout.y = 250;
+	mInputMeterRightLayout.inLayout.frameWidth = 20;
+	mInputMeterRightLayout.inLayout.frameHeight = 230;
+	mInputMeterRightLayout.inLayout.ratio = mScale;
+	mInputMeterRightLayout.inLayout.textboxHeight = 0;
+	mInputMeterRightLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mInputMeterRightLayout);
+
+	mOutputMeterLeftLayout.inLayout.x = 1725;
+	mOutputMeterLeftLayout.inLayout.y = 250;
+	mOutputMeterLeftLayout.inLayout.frameWidth = 20;
+	mOutputMeterLeftLayout.inLayout.frameHeight = 230;
+	mOutputMeterLeftLayout.inLayout.ratio = mScale;
+	mOutputMeterLeftLayout.inLayout.textboxHeight = 0;
+	mOutputMeterLeftLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mOutputMeterLeftLayout);
+
+	mOutputMeterRightLayout.inLayout.x = 1750;
+	mOutputMeterRightLayout.inLayout.y = 250;
+	mOutputMeterRightLayout.inLayout.frameWidth = 20;
+	mOutputMeterRightLayout.inLayout.frameHeight = 230;
+	mOutputMeterRightLayout.inLayout.ratio = mScale;
+	mOutputMeterRightLayout.inLayout.textboxHeight = 0;
+	mOutputMeterRightLayout.inLayout.textboxPadding = 0;
+	computeKnobLayout(mOutputMeterRightLayout);
+
 }
 
 
@@ -58,6 +95,10 @@ void RootViewComponent::configureNodes(juce::AudioProcessor& inProcessor)
 
 	mTopBar.setBounds(mTopBarLayout.outLayout.x,mTopBarLayout.outLayout.y,mTopBarLayout.outLayout.sliderWidth,mTopBarLayout.outLayout.sliderHeight);
 	mAnalyzer.setBounds(mAnalyzerLayout.outLayout.x,mAnalyzerLayout.outLayout.y,mAnalyzerLayout.outLayout.sliderWidth,mAnalyzerLayout.outLayout.sliderHeight);
+	addAndMakeVisible(mInputMeterLeft);
+	addAndMakeVisible(mInputMeterRight);
+	addAndMakeVisible(mOutputMeterLeft);
+	addAndMakeVisible(mOutputMeterRight);
 	addAndMakeVisible(mTopBar);
 	addAndMakeVisible(mInputGainKnob);
 	addAndMakeVisible(mOutputGainKnob);
