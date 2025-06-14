@@ -30,6 +30,16 @@ public:
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
         mParameterSetup.initializeParameters();
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);
+
+        mRmsInputLevelLeft.reset(inSampleRate, 0.2f);
+        mRmsInputLevelRight.reset(inSampleRate, 0.2f);
+        mRmsOutputLevelLeft.reset(inSampleRate, 0.2f);
+        mRmsOutputLevelRight.reset(inSampleRate, 0.2f);
+
+        mRmsInputLevelLeft.setCurrentAndTargetValue(-100.f);
+        mRmsInputLevelRight.setCurrentAndTargetValue(-100.f);
+        mRmsOutputLevelLeft.setCurrentAndTargetValue(-100.0f);
+        mRmsOutputLevelRight.setCurrentAndTargetValue(-100.0f);
     }
 
     void releaseResources() override {
@@ -64,10 +74,10 @@ public:
     }
 
 
-    double getRmsInputLevelLeft() const { return mRmsInputLevelLeft.load(); }
-    double getRmsInputLevelRight() const { return mRmsInputLevelLeft.load(); }
-    double getRmsOutputLevelLeft() const { return mRmsOutputLevelLeft.load(); }
-    double getRmsOutputLevelRight() const { return mRmsOutputLevelRight.load(); }
+    double getRmsInputLevelLeft() const { return mRmsInputLevelLeft.getCurrentValue(); }
+    double getRmsInputLevelRight() const { return mRmsInputLevelLeft.getCurrentValue(); }
+    double getRmsOutputLevelLeft() const { return mRmsOutputLevelLeft.getCurrentValue(); }
+    double getRmsOutputLevelRight() const { return mRmsOutputLevelRight.getCurrentValue(); }
     ParameterSetup& getParameterSetup() { return mParameterSetup; }
     //==============================================================================
     bool isBusesLayoutSupported(const BusesLayout &layouts) const override {
@@ -152,10 +162,10 @@ private:
     ParameterSetup &mParameterSetup;
 
 private:
-    std::atomic<float> mRmsInputLevelLeft{0.0f};
-    std::atomic<float> mRmsInputLevelRight{0.0f};
-    std::atomic<float> mRmsOutputLevelLeft{0.0f};
-    std::atomic<float> mRmsOutputLevelRight{0.0f};
+    LinearSmoothedValue<float> mRmsInputLevelLeft{0.0f};
+    LinearSmoothedValue<float> mRmsInputLevelRight{0.0f};
+    LinearSmoothedValue<float> mRmsOutputLevelLeft{0.0f};
+    LinearSmoothedValue<float> mRmsOutputLevelRight{0.0f};
 
     juce::AudioProcessorGraph mProcessorGraph;
 

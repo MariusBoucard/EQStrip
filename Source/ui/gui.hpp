@@ -63,7 +63,7 @@ void RootViewComponent::defineKnobLayout()
 	mInputMeterRightLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mInputMeterRightLayout);
 
-	mOutputMeterLeftLayout.inLayout.x = 1725;
+	mOutputMeterLeftLayout.inLayout.x = 1820;
 	mOutputMeterLeftLayout.inLayout.y = 250;
 	mOutputMeterLeftLayout.inLayout.frameWidth = 20;
 	mOutputMeterLeftLayout.inLayout.frameHeight = 230;
@@ -72,7 +72,7 @@ void RootViewComponent::defineKnobLayout()
 	mOutputMeterLeftLayout.inLayout.textboxPadding = 0;
 	computeKnobLayout(mOutputMeterLeftLayout);
 
-	mOutputMeterRightLayout.inLayout.x = 1750;
+	mOutputMeterRightLayout.inLayout.x = 1845;
 	mOutputMeterRightLayout.inLayout.y = 250;
 	mOutputMeterRightLayout.inLayout.frameWidth = 20;
 	mOutputMeterRightLayout.inLayout.frameHeight = 230;

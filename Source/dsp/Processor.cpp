@@ -35,9 +35,29 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
         auto inGain = std::pow(10.0f, (gainInDecibels) / 20.0f); // If we can migrate this pow to mappers
         inBuffer.applyGain(inGain);
     }
-    mRmsInputLevelLeft = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
-    mRmsInputLevelRight = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
-
+    mRmsInputLevelLeft.skip(inBuffer.getNumSamples());
+    {
+        auto value = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
+        if (value < mRmsInputLevelLeft.getCurrentValue())
+        {
+            mRmsInputLevelLeft.setTargetValue(value);
+        }
+        else
+        {
+            mRmsInputLevelLeft.setCurrentAndTargetValue(value);
+        }
+    }
+    {
+        auto value = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
+        if (value < mRmsInputLevelRight.getCurrentValue())
+        {
+            mRmsInputLevelRight.setTargetValue(value);
+        }
+        else
+        {
+            mRmsInputLevelRight.setCurrentAndTargetValue(value);
+        }
+    }
     mProcessorGraph.processBlock(inBuffer, inMidiBuffer);
 
     {
@@ -47,7 +67,30 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
     }
 
     // Metering
-    mRmsOutputLevelLeft = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
-    mRmsOutputLevelRight = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
+    mRmsOutputLevelLeft.skip(inBuffer.getNumSamples());
+    {
+        auto value = Decibels::gainToDecibels(inBuffer.getRMSLevel(0,0,inBuffer.getNumSamples()));
+        if (value < mRmsOutputLevelLeft.getCurrentValue())
+        {
+            mRmsOutputLevelLeft.setTargetValue(value);
+        }
+        else
+        {
+            mRmsOutputLevelLeft.setCurrentAndTargetValue(value);
+        }
+    }
+    mRmsOutputLevelRight.skip(inBuffer.getNumSamples());
+    {
+        auto value = Decibels::gainToDecibels(inBuffer.getRMSLevel(1,0,inBuffer.getNumSamples()));
+        if (value < mRmsOutputLevelRight.getCurrentValue())
+        {
+            mRmsOutputLevelRight.setTargetValue(value);
+        }
+        else
+        {
+            mRmsOutputLevelRight.setCurrentAndTargetValue(value);
+        }
+    }
+
     mAudioBufferFifo.push(inBuffer);
 }
