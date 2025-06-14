@@ -39,8 +39,12 @@ RootViewComponent::RootViewComponent(SkeletonAudioProcessor& processor)
 
 RootViewComponent::~RootViewComponent()
 {
-	
+    mInputGainKnobAttachement.reset();
+    mOutputGainKnobAttachement.reset();
 
+	mInputGainKnob.setLookAndFeel(nullptr);
+    mOutputGainKnob.setLookAndFeel(nullptr);
+    removeAllChildren();
 }
 
 void RootViewComponent::setSliderAttachement(AudioProcessor& inProcessor)

@@ -26,6 +26,7 @@ ResponseCurveComponent::~ResponseCurveComponent()
   {
     param->removeListener(this);
   }
+  stopTimer();
 }
 void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
 {

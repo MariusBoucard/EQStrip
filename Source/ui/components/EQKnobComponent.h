@@ -40,11 +40,34 @@ public:
 
     ~EQKnobComponent() override
     {
+        mLcQAttachement.reset();
+        mHSQAttachement.reset();
+        mBell1QAttachement.reset();
+        mBell1FreqAttachement.reset();
+        mBell1GainAttachement.reset();
+        mBell2QAttachement.reset();
+        mBell2FreqAttachement.reset();
+        mBell2GainAttachement.reset();
+        mHSGainAttachement.reset();
+        mLcFreqAttachement.reset();
+        mHSFreqAttachement.reset();
+
+        mBell1Freq.setLookAndFeel(nullptr);
+        mBell1Q.setLookAndFeel(nullptr);
+        mBell1Gain.setLookAndFeel(nullptr);
+        mBell2Freq.setLookAndFeel(nullptr);
+        mBell2Q.setLookAndFeel(nullptr);
+        mBell2Gain.setLookAndFeel(nullptr);
+        mLCFreq.setLookAndFeel(nullptr);
+        mLCQ.setLookAndFeel(nullptr);
+        mHSFreq.setLookAndFeel(nullptr);
+        mHSQ.setLookAndFeel(nullptr);
+        mHSGain.setLookAndFeel(nullptr);
+
         setLookAndFeel(nullptr);
     }
     void computeKnobLayout(KnobLayout& inKnobLayout)
     {
-
         inKnobLayout.outLayout.sliderWidth = inKnobLayout.inLayout.frameWidth *mScale;
         inKnobLayout.outLayout.sliderHeight = inKnobLayout.inLayout.frameHeight * mScale;
         inKnobLayout.outLayout.x = inKnobLayout.inLayout.x*mScale;
@@ -108,8 +131,6 @@ public:
     }
 
 private:
-    KnobLookAndFeel mButtonLookNFeel;
-
     juce::AudioProcessor& mProcessor;
 
     juce::Slider mLCFreq;

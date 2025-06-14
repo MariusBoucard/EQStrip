@@ -319,7 +319,13 @@ jucer_export_target_configuration(
   OPTIMISATION "Maximise speed"
 )
 
+
+
 jucer_project_end()
+
+target_compile_definitions(${PROJECT_NAME}_StandalonePlugin PRIVATE
+        JUCE_CHECK_MEMORY_LEAKS=1
+)
 
 add_custom_command(TARGET EQStrip_VST3 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different

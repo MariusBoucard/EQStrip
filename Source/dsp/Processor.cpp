@@ -18,7 +18,13 @@ SkeletonAudioProcessor::SkeletonAudioProcessor(juce::AudioProcessorValueTreeStat
 }
 SkeletonAudioProcessor::~SkeletonAudioProcessor()
 {
-
+    mProcessorGraph.clear();
+    mInputNode = nullptr;
+    mOutputNode = nullptr;
+    mHpfNode = nullptr;
+    mBellNode1 = nullptr;
+    mBellNode2 = nullptr;
+    mHShelfNode = nullptr;
 }  
 void SkeletonAudioProcessor::updateMeter(bool isOutput, AudioBuffer<float>& buffer,int numSamples,int numChannels)
 {
