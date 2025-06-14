@@ -52,17 +52,14 @@ public:
         mLcFreqAttachement.reset();
         mHSFreqAttachement.reset();
 
-        mBell1Freq.setLookAndFeel(nullptr);
-        mBell1Q.setLookAndFeel(nullptr);
-        mBell1Gain.setLookAndFeel(nullptr);
-        mBell2Freq.setLookAndFeel(nullptr);
-        mBell2Q.setLookAndFeel(nullptr);
-        mBell2Gain.setLookAndFeel(nullptr);
-        mLCFreq.setLookAndFeel(nullptr);
-        mLCQ.setLookAndFeel(nullptr);
-        mHSFreq.setLookAndFeel(nullptr);
-        mHSQ.setLookAndFeel(nullptr);
-        mHSGain.setLookAndFeel(nullptr);
+        for (auto* child : getChildren())
+        {
+            if (auto* slider = dynamic_cast<juce::Slider*>(child))
+                slider->setLookAndFeel(nullptr);
+        }
+
+        mKnobLookAndFeels.clear();
+        removeAllChildren();
 
         setLookAndFeel(nullptr);
     }
@@ -131,6 +128,8 @@ public:
     }
 
 private:
+    std::vector<std::unique_ptr<KnobLookAndFeel>> mKnobLookAndFeels;
+
     juce::AudioProcessor& mProcessor;
 
     juce::Slider mLCFreq;

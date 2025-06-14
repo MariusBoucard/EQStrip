@@ -43,7 +43,7 @@ jucer_project_settings(
 jucer_audio_plugin_settings(
   PLUGIN_FORMATS
     "VST3"
-    "AU"
+    #"AU"
     "Standalone"
   # PLUGIN_CHARACTERISTICS
   PLUGIN_NAME "EQStrip"

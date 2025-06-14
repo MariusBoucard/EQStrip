@@ -42,8 +42,14 @@ RootViewComponent::~RootViewComponent()
     mInputGainKnobAttachement.reset();
     mOutputGainKnobAttachement.reset();
 
-	mInputGainKnob.setLookAndFeel(nullptr);
-    mOutputGainKnob.setLookAndFeel(nullptr);
+    for (auto* child : getChildren())
+    {
+        if (auto* slider = dynamic_cast<juce::Slider*>(child))
+            slider->setLookAndFeel(nullptr);
+    }
+
+    mKnobLookAndFeels.clear();
+
     removeAllChildren();
 }
 

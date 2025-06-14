@@ -30,7 +30,7 @@ ParameterSetup::~ParameterSetup() {
     mParameters.removeParameterListener("HS_Freq",this);
     mParameters.removeParameterListener("HS_Gain",this);
     mParameters.removeParameterListener("HS_Q",this);
-    stopThread(10);
+    stopThread(100);
 }
 
 ParameterSetupData ParameterSetup::createSetupData() {
