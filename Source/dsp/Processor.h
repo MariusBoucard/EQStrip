@@ -26,7 +26,7 @@ public:
                                               mBlockSize);
         initialiseGraph();
         mProcessorGraph.rebuild();
-        mLeftChannelFifo.prepare(mBlockSize);
+        mAudioBufferFifo.prepare(2,inBlockSize); // Carefull two channels there
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
         mParameterSetup.initializeParameters();
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);
@@ -144,8 +144,8 @@ public:
 
     }
 
-    SingleChannelSampleFifo &getLeftChannelFifo() {
-        return mLeftChannelFifo;
+    AudioBufferFifo &getAudioBufferFifo() {
+        return mAudioBufferFifo;
     }
 
 private:
@@ -171,7 +171,7 @@ private:
     juce::AudioProcessorGraph::Node::Ptr mBellNode2;
     juce::AudioProcessorGraph::Node::Ptr mHShelfNode;
 
-    SingleChannelSampleFifo mLeftChannelFifo {Channel::Left};
+    AudioBufferFifo mAudioBufferFifo;
 
     double mBlockSize;
     double mSampleRate;

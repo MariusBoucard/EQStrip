@@ -67,5 +67,5 @@ void SkeletonAudioProcessor::processBlock(AudioBuffer<float>& inBuffer, MidiBuff
 
     // Metering
     updateMeter(true, inBuffer, inBuffer.getNumSamples(), getTotalNumOutputChannels());
-    mLeftChannelFifo.update(inBuffer);
+    mAudioBufferFifo.push(inBuffer);
 }

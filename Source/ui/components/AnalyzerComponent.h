@@ -185,7 +185,7 @@ private:
 
 
 struct PathProducer {
-    PathProducer(SingleChannelSampleFifo &scsf) : leftChannelFifo(&scsf) {
+    PathProducer(AudioBufferFifo &scsf) : mAudioBufferFifo(&scsf) {
         leftChannelFFTDataGenerator.changeOrder(FFTOrder::order32); // Will change to fifo to make biger ff
         monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
     }
@@ -195,7 +195,7 @@ struct PathProducer {
     juce::Path getPath() const { return pathProducer.getPath(); }
 
 private:
-    SingleChannelSampleFifo *leftChannelFifo;
+    AudioBufferFifo *mAudioBufferFifo;
     juce::AudioBuffer<float> monoBuffer;
     FFTDataGenerator<std::vector<float> > leftChannelFFTDataGenerator;
     AnalyzerPathGenerator<juce::Path> pathProducer;
