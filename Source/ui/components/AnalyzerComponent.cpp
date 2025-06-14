@@ -1,13 +1,13 @@
 #include "AnalyzerComponent.h"
-
 #include "../../dsp/Processor.h"
 
-ResponseCurveComponent::ResponseCurveComponent(SkeletonAudioProcessor &p, juce::AudioProcessorValueTreeState& inParams,ParameterSetup& inParameterSetup) : mProcessor(p),
-                                                                                                                                          mParameters(inParams),
-                                                                                                                                          mParameterSetup(inParameterSetup),
-                                                                                                                                          mLeftPathProducer(mProcessor.getLeftChannelFifo())
-                                                                            // rightPathProducer(mProcessor.rightChannelFifo)
- //leftChannelFifo(&audioProcessor.leftChannelFifo)
+ResponseCurveComponent::ResponseCurveComponent(SkeletonAudioProcessor &p,
+                                              juce::AudioProcessorValueTreeState& inParams,
+                                              ParameterSetup& inParameterSetup)
+: mProcessor(p),
+  mParameters(inParams),
+  mParameterSetup(inParameterSetup),
+  mLeftPathProducer(mProcessor.getAudioBufferFifo())
 {
   const auto &params = mProcessor.getParameters();
   for (auto param : params)
@@ -26,6 +26,7 @@ ResponseCurveComponent::~ResponseCurveComponent()
   {
     param->removeListener(this);
   }
+  stopTimer();
 }
 void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float newValue)
 {
@@ -38,21 +39,11 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
   // FFT START HERE SEEMS HARDDDD
   juce::AudioBuffer<float> tempIncomingBuffer;
 
-  while (leftChannelFifo->getNumCompleteBuffersAvailable() > 0)
+  while (mAudioBufferFifo->getNumAvailableForReading() > 0)
   {
-    if (leftChannelFifo->getAudioBuffer(tempIncomingBuffer))
+    if (mAudioBufferFifo->pull(tempIncomingBuffer))
     {
       auto size = tempIncomingBuffer.getNumSamples();
-      // On commence a ecrire dans monobuffer en 0, on copy ce qu'il y a depuis size, puis on copie tout le reste - size car on va pas plus loin
-      // juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(1, 0),
-      //                                   monoBuffer.getReadPointer(1, size),
-      //                                   monoBuffer.getNumSamples() - size);
-      //
-      // // Puis on colle a la fin de notre monoBuffer ce qui vient du tempIncomingBUffer
-      // juce::FloatVectorOperations::copy(monoBuffer.getWritePointer(0, monoBuffer.getNumSamples() - size),
-      //                                   tempIncomingBuffer.getReadPointer(0, 0),
-      //                                   size);
-      //
       leftChannelFFTDataGenerator.produceFFTDataForRendering(tempIncomingBuffer, -48.f);
     }
   }
@@ -66,7 +57,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
   // /*
   // 48000/2048 = 23 hz : this is the binwidth
   // */
-  const auto binWidth = sampleRate / (double)fftSize;
+  const auto binWidth = 22000 / (double)fftSize;
 
   auto fftData = leftChannelFFTDataGenerator.getFFTData();
     if (fftData.data()) {
@@ -79,7 +70,7 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
    */
   while (pathProducer.getNumPathsAvailable())
   {
-    pathProducer.getPath(leftChannelFFTPath);
+   // pathProducer.getPath(leftChannelFFTPath);
   }
 }
 void ResponseCurveComponent::timerCallback()

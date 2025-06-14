@@ -183,8 +183,8 @@ public:
     void processBlock(AudioBuffer<float>& buffer, MidiBuffer&) override;
 
     AudioProcessorEditor* createEditor() override {
-       auto editor = new RootViewComponent(mSkeletonProcessor);
-       // auto editor = new GenericAudioProcessorEditor(this);
+      auto editor = new RootViewComponent(mSkeletonProcessor);
+      //  auto editor = new GenericAudioProcessorEditor(this);
 
         //editor->updatePath();
         return editor;

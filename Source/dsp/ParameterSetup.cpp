@@ -18,8 +18,19 @@ ParameterSetup::ParameterSetup(juce::AudioProcessorValueTreeState &inApvts)
 
 ParameterSetup::~ParameterSetup() {
     mTasksEvent.signal();
-
-    stopThread(10);
+    mParameters.removeParameterListener("gain",this);
+    mParameters.removeParameterListener("HPF_Freq",this);
+    mParameters.removeParameterListener("HPF_Q",this);
+    mParameters.removeParameterListener("Bell1_Freq",this);
+    mParameters.removeParameterListener("Bell1_Gain",this);
+    mParameters.removeParameterListener("Bell1_Q",this);
+    mParameters.removeParameterListener("Bell2_Freq",this);
+    mParameters.removeParameterListener("Bell2_Gain",this);
+    mParameters.removeParameterListener("Bell2_Q",this);
+    mParameters.removeParameterListener("HS_Freq",this);
+    mParameters.removeParameterListener("HS_Gain",this);
+    mParameters.removeParameterListener("HS_Q",this);
+    stopThread(100);
 }
 
 ParameterSetupData ParameterSetup::createSetupData() {

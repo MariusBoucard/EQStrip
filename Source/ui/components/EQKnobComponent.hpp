@@ -152,9 +152,10 @@ void EQKnobComponent::configureKnob(juce::Slider& inKnob, KnobLayout& inLayout, 
 
 	inKnob.setBounds(inLayout.outLayout.x,inLayout.outLayout.y,inLayout.outLayout.sliderWidth,inLayout.outLayout.sliderHeight);
 	inKnob.setSliderStyle(juce::Slider::RotaryHorizontalVerticalDrag);
-	inKnob.setLookAndFeel(new KnobLookAndFeel());
-	auto look = dynamic_cast<KnobLookAndFeel*>(&inKnob.getLookAndFeel());
-	look->setImage(inImage, inImageSize);
+	auto newLookAndFeel = std::make_unique<KnobLookAndFeel>();
+	newLookAndFeel->setImage(inImage, inImageSize);
+	inKnob.setLookAndFeel(newLookAndFeel.get());
+	mKnobLookAndFeels.push_back(std::move(newLookAndFeel));
 	inKnob.setTextBoxStyle(juce::Slider::NoTextBox, false, 0, 0);
 	inKnob.setPopupDisplayEnabled(true,true, this);
 	addAndMakeVisible(inKnob);

@@ -9,7 +9,7 @@ RootViewComponent::RootViewComponent(SkeletonAudioProcessor& processor)
     , mTopBar(processor)
     , mEQStrip(processor,180,670)
     , mScale(0.5f)
-    , mAnalyzer(mProcessor,dynamic_cast<SkeletonAudioProcessor&>(processor).getCustomParameterTree(),dynamic_cast<SkeletonAudioProcessor&>(processor).getParameterSetup())
+    , mAnalyzer(mProcessor,processor.getCustomParameterTree(),processor.getParameterSetup())
 {
     auto imageData = BinaryData::plate_png;
     auto imageDataSize = BinaryData::plate_pngSize;
@@ -34,13 +34,22 @@ RootViewComponent::RootViewComponent(SkeletonAudioProcessor& processor)
     setSize(mImage.getBounds().getWidth()*mScale, mImage.getBounds().getHeight()*mScale);
     defineKnobLayout();
     configureNodes(processor);
-
+    startTimer(1000/30);
 }
 
 RootViewComponent::~RootViewComponent()
 {
-	
+    mInputGainKnobAttachement.reset();
+    mOutputGainKnobAttachement.reset();
 
+    for (auto* child : getChildren())
+    {
+        if (auto* slider = dynamic_cast<juce::Slider*>(child))
+            slider->setLookAndFeel(nullptr);
+    }
+
+    mKnobLookAndFeels.clear();
+    removeAllChildren();
 }
 
 void RootViewComponent::setSliderAttachement(AudioProcessor& inProcessor)
@@ -49,6 +58,23 @@ void RootViewComponent::setSliderAttachement(AudioProcessor& inProcessor)
     mInputGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "inputGain", mInputGainKnob);
     mOutputGainKnobAttachement = std::make_unique<juce::AudioProcessorValueTreeState::SliderAttachment>(processor->getCustomParameterTree(), "outputGain", mOutputGainKnob);
 
+}
+
+void RootViewComponent::timerCallback()
+{
+  auto leftInputLevel = mProcessor.getRmsInputLevelLeft();
+  auto rightInputLevel = mProcessor.getRmsInputLevelRight();
+    mInputMeterRight.setLevel(rightInputLevel);
+    mInputMeterRight.repaint();
+    mInputMeterLeft.setLevel(leftInputLevel);
+    mInputMeterLeft.repaint();
+
+    auto leftOutputLevel = mProcessor.getRmsOutputLevelLeft();
+    auto rightOutputLevel = mProcessor.getRmsOutputLevelRight();
+    mOutputMeterRight.setLevel(rightOutputLevel);
+    mOutputMeterRight.repaint();
+    mOutputMeterLeft.setLevel(leftOutputLevel);
+    mOutputMeterLeft.repaint();
 }
 
 void RootViewComponent::updatePath()
@@ -107,4 +133,30 @@ void RootViewComponent::resized()
     mEQStrip.setBounds(mEQStripLayout.outLayout.x,mEQStripLayout.outLayout.y,mEQStripLayout.outLayout.sliderWidth,mEQStripLayout.outLayout.sliderHeight);
     mEQStrip.setScale(mScale);
     mEQStrip.resized();
+
+    mInputMeterLeftLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mInputMeterLeftLayout);
+    mInputMeterLeft.setBounds(mInputMeterLeftLayout.outLayout.x,
+                              mInputMeterLeftLayout.outLayout.y,
+                              mInputMeterLeftLayout.outLayout.sliderWidth,
+                              mInputMeterLeftLayout.outLayout.sliderHeight);
+
+    mInputMeterRightLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mInputMeterRightLayout);
+    mInputMeterRight.setBounds(mInputMeterRightLayout.outLayout.x,
+                              mInputMeterRightLayout.outLayout.y,
+                              mInputMeterRightLayout.outLayout.sliderWidth,
+                              mInputMeterRightLayout.outLayout.sliderHeight);
+
+    mOutputMeterLeftLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mOutputMeterLeftLayout);
+    mOutputMeterLeft.setBounds(mOutputMeterLeftLayout.outLayout.x,
+        mOutputMeterLeftLayout.outLayout.y,
+            mOutputMeterLeftLayout.outLayout.sliderWidth, mOutputMeterLeftLayout.outLayout.sliderHeight);
+
+    mOutputMeterRightLayout.inLayout.ratio = mScale;
+    computeKnobLayout(mOutputMeterRightLayout);
+    mOutputMeterRight.setBounds(mOutputMeterRightLayout.outLayout.x,
+        mOutputMeterRightLayout.outLayout.y,
+            mOutputMeterRightLayout.outLayout.sliderWidth, mOutputMeterRightLayout.outLayout.sliderHeight);
 }

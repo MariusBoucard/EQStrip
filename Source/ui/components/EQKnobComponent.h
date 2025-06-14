@@ -40,11 +40,31 @@ public:
 
     ~EQKnobComponent() override
     {
+        mLcQAttachement.reset();
+        mHSQAttachement.reset();
+        mBell1QAttachement.reset();
+        mBell1FreqAttachement.reset();
+        mBell1GainAttachement.reset();
+        mBell2QAttachement.reset();
+        mBell2FreqAttachement.reset();
+        mBell2GainAttachement.reset();
+        mHSGainAttachement.reset();
+        mLcFreqAttachement.reset();
+        mHSFreqAttachement.reset();
+
+        for (auto* child : getChildren())
+        {
+            if (auto* slider = dynamic_cast<juce::Slider*>(child))
+                slider->setLookAndFeel(nullptr);
+        }
+
+        mKnobLookAndFeels.clear();
+        removeAllChildren();
+
         setLookAndFeel(nullptr);
     }
     void computeKnobLayout(KnobLayout& inKnobLayout)
     {
-
         inKnobLayout.outLayout.sliderWidth = inKnobLayout.inLayout.frameWidth *mScale;
         inKnobLayout.outLayout.sliderHeight = inKnobLayout.inLayout.frameHeight * mScale;
         inKnobLayout.outLayout.x = inKnobLayout.inLayout.x*mScale;
@@ -108,7 +128,7 @@ public:
     }
 
 private:
-    KnobLookAndFeel mButtonLookNFeel;
+    std::vector<std::unique_ptr<KnobLookAndFeel>> mKnobLookAndFeels;
 
     juce::AudioProcessor& mProcessor;
 

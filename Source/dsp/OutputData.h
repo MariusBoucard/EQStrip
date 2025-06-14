@@ -14,9 +14,9 @@ struct AudioBufferFifo
         {
             buffer.setSize(numChannels,
                            numSamples,
-                           false, // clear everything?
-                           true,  // including the extra space?
-                           true); // avoid reallocating?
+                           false,
+                           true,
+                           true);
             buffer.clear();
         }
     }

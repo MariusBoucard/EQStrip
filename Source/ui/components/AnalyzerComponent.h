@@ -93,9 +93,9 @@ struct FFTDataGenerator
        // fftDataFifo.prepare(fftData.size()); // Prepare the FIFO to hold vectors of this size
     }
     //==============================================================================
-    int getFFTSize() const { return 1 << 3; }
+    int getFFTSize() const { return 1 << 8; }
      int getNumAvailableFFTDataBlocks() const { return fftDataFifo.getNumAvailableForReading(); }
-    std::vector<float> getFFTData() const { return fftData; }
+    std::vector<float> getFFTData() const { return mCurrentFFT; }
     //==============================================================================
     bool getFFTData(BlockType& dataToFill) { return false; // fftDataFifo.pull(dataToFill);
         }
@@ -120,6 +120,7 @@ struct AnalyzerPathGenerator
                       float binWidth,
                       float negativeInfinity)
     {
+        std::vector<float> newRenderData(renderData.begin() + 128, renderData.begin() + 256);
         auto top = fftBounds.getY();
         auto bottom = fftBounds.getHeight();
         auto width = fftBounds.getWidth();
@@ -136,7 +137,7 @@ struct AnalyzerPathGenerator
                               float(bottom+10),   top);
         };
 
-        auto y = map(renderData[0]);
+        auto y = map(newRenderData[0]);
 
         if( std::isnan(y) || std::isinf(y) )
             y = bottom;
@@ -185,7 +186,7 @@ private:
 
 
 struct PathProducer {
-    PathProducer(SingleChannelSampleFifo &scsf) : leftChannelFifo(&scsf) {
+    PathProducer(AudioBufferFifo &scsf) : mAudioBufferFifo(&scsf) {
         leftChannelFFTDataGenerator.changeOrder(FFTOrder::order32); // Will change to fifo to make biger ff
         monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
     }
@@ -195,7 +196,7 @@ struct PathProducer {
     juce::Path getPath() const { return pathProducer.getPath(); }
 
 private:
-    SingleChannelSampleFifo *leftChannelFifo;
+    AudioBufferFifo *mAudioBufferFifo;
     juce::AudioBuffer<float> monoBuffer;
     FFTDataGenerator<std::vector<float> > leftChannelFFTDataGenerator;
     AnalyzerPathGenerator<juce::Path> pathProducer;

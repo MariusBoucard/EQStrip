@@ -43,7 +43,7 @@ jucer_project_settings(
 jucer_audio_plugin_settings(
   PLUGIN_FORMATS
     "VST3"
-    "AU"
+    #"AU"
     "Standalone"
   # PLUGIN_CHARACTERISTICS
   PLUGIN_NAME "EQStrip"
@@ -117,16 +117,16 @@ jucer_project_files("EQStrip/Source/ui/components"
   x         .         .         "Source/ui/components/TopBarComponent.cpp"
   x         .         .         "Source/ui/components/TopBarComponent.h"
   x         .         .         "Source/ui/components/AnalyzerComponent.h"
-    x         .         .         "Source/ui/components/AnalyzerComponent.cpp"
-
+  x         .         .         "Source/ui/components/AnalyzerComponent.cpp"
+  x         .         .         "Source/ui/components/VerticalMeterComponent.cpp"
+  x         .         .         "Source/ui/components/VerticalMeterComponent.h"
 )
 
 
 jucer_project_files("EQStrip/ressources/knob"
 # Compile   Xcode     Binary    File
 #           Resource  Resource
-
-  .         x         x         "Source/ressources/knob/Bell1Freq.png"
+.         x         x         "Source/ressources/knob/Bell1Freq.png"
 .         x         x         "Source/ressources/knob/Bell1Gain.png"
 .         x         x         "Source/ressources/knob/GainKnob.png"
 .         x         x         "Source/ressources/knob/Bell2Freq.png"
@@ -138,7 +138,6 @@ jucer_project_files("EQStrip/ressources/knob"
 .         x         x         "Source/ressources/knob/HSGain.png"
 .         x         x         "Source/ressources/knob/HSq.png"
 .         x         x         "Source/ressources/knob/outputGain.png"
-
 )
 
 
@@ -319,7 +318,13 @@ jucer_export_target_configuration(
   OPTIMISATION "Maximise speed"
 )
 
+
+
 jucer_project_end()
+
+target_compile_definitions(${PROJECT_NAME}_StandalonePlugin PRIVATE
+        JUCE_CHECK_MEMORY_LEAKS=1
+)
 
 add_custom_command(TARGET EQStrip_VST3 POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different
