@@ -50,20 +50,20 @@ struct FFTDataGenerator
 
         int numBins = (int)fftSize / 2;
 
-        // //normalize the fft values.
-        for( int i = 0; i < numBins; ++i )
-        {
-            auto fftValueBin = mFftData[i];
-            if( !std::isinf(fftValueBin) && !std::isnan(fftValueBin) )
-            {
-                fftValueBin /= float(numBins);
-            }
-            else
-            {
-                fftValueBin = 0.f;
-            }
-            mFftData[i] = fftValueBin;
-        }
+        // // //normalize the fft values.
+        // for( int i = 0; i < numBins; ++i )
+        // {
+        //     auto fftValueBin = mFftData[i];
+        //     if( !std::isinf(fftValueBin) && !std::isnan(fftValueBin) )
+        //     {
+        //         fftValueBin /= float(numBins);
+        //     }
+        //     else
+        //     {
+        //         fftValueBin = 0.f;
+        //     }
+        //     mFftData[i] = fftValueBin;
+        // }
 
         //convert them to decibels
         for( int i = 0; i < numBins; ++i )
@@ -135,9 +135,8 @@ struct AnalyzerPathGenerator
                       float binWidth,
                       float negativeInfinity)
     {
-        std::vector<float> newRenderData(renderData.size()); // WTF
         auto top = 0;
-        auto bottom = fftBounds.getHeight();
+        auto bottom = fftBounds.getHeight()-10;
         auto width = fftBounds.getWidth();
 
         int numBins = (int)fftSize / 2; // Why
@@ -154,7 +153,7 @@ struct AnalyzerPathGenerator
                               top);
         };
 
-        auto y = map(newRenderData[0]); // Not sure it do the whole thing
+        auto y = map(renderData[0]);
 
         if( std::isnan(y) || std::isinf(y) )
             y = bottom;
@@ -162,7 +161,7 @@ struct AnalyzerPathGenerator
         p.startNewSubPath(0, y);
 
         const int pathResolution = 2;
-
+       // p.lineTo(300, 0);
         for( int binNum = 1; binNum < numBins; binNum += pathResolution )
         {
             y = map(renderData[binNum]);
@@ -175,8 +174,8 @@ struct AnalyzerPathGenerator
                 p.lineTo(binX, y);
             }
         }
-
-        mPathFifo.push(p);
+        mCurrentPath = p;
+      //  mPathFifo.push(p);
     }
     
 
@@ -187,12 +186,13 @@ struct AnalyzerPathGenerator
 
     PathType getPath()
     {
-        return mPathFifo.front();
+        return mCurrentPath;
     }
 
 private:
     std::queue<juce::Path> mPathFifo;
     PathType mPath;
+    juce::Path mCurrentPath;
 };
 
 
@@ -208,14 +208,14 @@ struct PathProducer {
 
     void process(Rectangle<float> fftBounds, double sampleRate);
 
-        Path getPath() {
-        if (mPathProducer.getNumPathsAvailable() > 0)
-        {
-        return mPathProducer.getPath();
-        }
-        else
-        { return Path();}
-        }
+    Path getPath() {
+    // if (mPathProducer.getNumPathsAvailable() > 0)
+    // {
+    return mPathProducer.getPath();
+    // }
+    // else
+    // { return Path();}
+    }
 
 private:
     AudioBufferFifo *mAudioBufferFifo;

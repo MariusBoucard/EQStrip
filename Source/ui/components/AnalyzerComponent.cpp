@@ -34,37 +34,50 @@ void ResponseCurveComponent::parameterValueChanged(int parameterIndex, float new
 }
 
 //===========================Lets move from timer calleback in here
-void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
-{
+void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate) {
   // FFT START HERE SEEMS HARDDDD
-  juce::AudioBuffer<float> tempIncomingBuffer;
-
+  juce::AudioBuffer<float> tempIncomingBuffer(1, 2048);
+  bool available = false;
   // Pull from fifo and ask for rendering // Merging buffer could be here to increase fft precision
-  while (mAudioBufferFifo->getNumAvailableForReading() > 0)
+  if (mAudioBufferFifo->getNumAvailableForReading() > 2048 / 441) // To change TODO using bufferSize
   {
-    if (mAudioBufferFifo->pull(tempIncomingBuffer))
-    {
-      auto size = tempIncomingBuffer.getNumSamples();
-      // Cat buffers if needed
-      leftChannelFFTDataGenerator.produceFFTDataForRendering(tempIncomingBuffer, -48.f);
+    available = true;
+    int writePosition = 0;
+    juce::AudioBuffer<float> pulledBuffer;
+    for (int i = 0; i < 2048 / 441; ++i) {
+      int numSamplesToCopy = juce::jmin(
+        pulledBuffer.getNumSamples(),
+        tempIncomingBuffer.getNumSamples() - writePosition
+      );
+      mAudioBufferFifo->pull(pulledBuffer);
+      // Copy samples from pulledBuffer to tempIncomingBuffer
+      for (int ch = 0; ch < tempIncomingBuffer.getNumChannels(); ++ch) {
+        tempIncomingBuffer.copyFrom(ch, writePosition, pulledBuffer, ch, 0, numSamplesToCopy);
+      }
+
+      writePosition += numSamplesToCopy;
     }
+  }
+
+  if (available) {
+    leftChannelFFTDataGenerator.produceFFTDataForRendering(tempIncomingBuffer, -48.f);
   }
 
 
   const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
 
   // 48000/2048 = 23 hz : this is the binwidth //Carefull this could mess up TODO
-  const auto binWidth = Mappers::getSamplerate() / (double)fftSize;
+  const auto binWidth = Mappers::getSamplerate() / (double) fftSize;
 
   auto fftData = leftChannelFFTDataGenerator.getFFTData();
-    if (fftData.data()) {
-      mPathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
-    }
+  if (fftData.data()) {
+    mPathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+  }
 
 
-  while (mPathProducer.getNumPathsAvailable())
-  {
-      mCurrentPath =  mPathProducer.getPath();
+  mCurrentPath = mPathProducer.getPath();
+  while (mPathProducer.getNumPathsAvailable()) {
+    // mPathProducer.getPath();
   }
 }
 
@@ -274,7 +287,5 @@ juce::Rectangle<int> ResponseCurveComponent::getRenderArea()
 juce::Rectangle<int> ResponseCurveComponent::getAnalysisArea()
 {
   auto bounds = getRenderArea();
-  bounds.removeFromBottom(4);
-  bounds.removeFromTop(4);
   return bounds;
 }
