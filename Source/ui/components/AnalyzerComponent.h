@@ -66,9 +66,10 @@ struct FFTDataGenerator
         // }
 
         //convert them to decibels
-        for( int i = 0; i < numBins; ++i )
+        auto offset = 512;
+        for( int i = 0 + offset; i < numBins+offset; ++i )
         {
-            mFftData[i] = juce::Decibels::gainToDecibels(mFftData[i], negativeInfinity);
+            mFftData[i-offset] = juce::Decibels::gainToDecibels(mFftData[i], negativeInfinity);
         }
 
         int numSamples = (int) mFftData.size();
@@ -136,7 +137,7 @@ struct AnalyzerPathGenerator
                       float negativeInfinity)
     {
         auto top = 0;
-        auto bottom = fftBounds.getHeight()-10;
+        auto bottom = fftBounds.getHeight();
         auto width = fftBounds.getWidth();
 
         int numBins = (int)fftSize / 2; // Why
