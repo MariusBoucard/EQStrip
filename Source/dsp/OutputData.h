@@ -51,7 +51,7 @@ struct AudioBufferFifo
     }
 
 private:
-    static constexpr int Capacity = 30;
+    static constexpr int Capacity = 100;
     std::array<juce::AudioBuffer<float>, Capacity> buffers;
     juce::AbstractFifo fifo{ Capacity };
 };

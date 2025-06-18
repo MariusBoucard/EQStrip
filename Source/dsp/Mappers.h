@@ -57,6 +57,8 @@ public:
 		inSetup = newCoeffs;
 	}
 
+	static int getSamplerate(){ return getMapperInstance().mSampleRate;};
+
 private:
 	double mSampleRate;
 	juce::AudioProcessorValueTreeState* mParameters; // Store as pointer to avoid object slicing

@@ -39,40 +39,35 @@ void PathProducer::process(juce::Rectangle<float> fftBounds, double sampleRate)
   // FFT START HERE SEEMS HARDDDD
   juce::AudioBuffer<float> tempIncomingBuffer;
 
+  // Pull from fifo and ask for rendering // Merging buffer could be here to increase fft precision
   while (mAudioBufferFifo->getNumAvailableForReading() > 0)
   {
     if (mAudioBufferFifo->pull(tempIncomingBuffer))
     {
       auto size = tempIncomingBuffer.getNumSamples();
+      // Cat buffers if needed
       leftChannelFFTDataGenerator.produceFFTDataForRendering(tempIncomingBuffer, -48.f);
     }
   }
 
-  /**
-   *  if there are FFt data to pull
-   * if we can pull a buffer then generate a path
-   */
+
   const auto fftSize = leftChannelFFTDataGenerator.getFFTSize();
-  //
-  // /*
-  // 48000/2048 = 23 hz : this is the binwidth
-  // */
-  const auto binWidth = 22000 / (double)fftSize;
+
+  // 48000/2048 = 23 hz : this is the binwidth //Carefull this could mess up TODO
+  const auto binWidth = Mappers::getSamplerate() / (double)fftSize;
 
   auto fftData = leftChannelFFTDataGenerator.getFFTData();
     if (fftData.data()) {
-      pathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
+      mPathProducer.generatePath(fftData, fftBounds, fftSize, binWidth, -48.f);
     }
 
-  /**
-   * while there are path that can be pull, pull as many as we can
-   * we only display the most recent one
-   */
-  while (pathProducer.getNumPathsAvailable())
+
+  while (mPathProducer.getNumPathsAvailable())
   {
-   // pathProducer.getPath(leftChannelFFTPath);
+      mCurrentPath =  mPathProducer.getPath();
   }
 }
+
 void ResponseCurveComponent::timerCallback()
 {
   if(shouldShowFFTAnalisis){
@@ -86,7 +81,6 @@ void ResponseCurveComponent::timerCallback()
   {
     // update the monochain
     updateChain();
-    // set a repaint
   }
   repaint();
 }
@@ -154,34 +148,13 @@ void ResponseCurveComponent::paint(juce::Graphics &g)
   g.setColour(juce::Colours::red);
   g.strokePath(responseCurve, juce::PathStrokeType(2.f));
 
-  g.setColour(juce::Colours::red);
-  juce::Path leftPath;
-  leftPath = mLeftPathProducer.getPath();
-  juce::Rectangle<float> pathBounds = leftPath.getBounds();
+  g.setColour(juce::Colours::blue);
+  juce::Path mAnalyzerPath;
+  mAnalyzerPath = mLeftPathProducer.getPath();
+  juce::Rectangle<float> pathBounds = mAnalyzerPath.getBounds();
 
-  // Check if the bounds are valid (not containing NaNs or infinities)
-  if (! pathBounds.getWidth() > 0.0f || ! pathBounds.getHeight() > 0.0f ||
-      ! pathBounds.getX() == pathBounds.getX() || // check for NaN
-      ! pathBounds.getY() == pathBounds.getY())   // check for NaN
-  {
-    DBG("Left path has invalid or zero-sized bounds!");
-    DBG("Bounds: " << pathBounds.toString()); // Log the bounds for debugging
-    // You might want to skip drawing or draw a warning here
-    return;
-  }
-
-
-  // You could also check if the path is entirely off-screen
-  // juce::Rectangle<float> localBounds = getLocalBounds().toFloat();
-  // if (! localBounds.intersects(pathBounds))
-  // {
-  //     DBG("Left path is completely off-screen!");
-  //     return;
-  // }
-
-
-  g.strokePath(leftPath, juce::PathStrokeType(2.f));
-  g.strokePath(mLeftPathProducer.getPath(), juce::PathStrokeType(2.f));
+  g.strokePath(mAnalyzerPath, juce::PathStrokeType(2.f));
+  //g.strokePath(mLeftPathProducer.getPath(), juce::PathStrokeType(2.f));
 }
 
 void ResponseCurveComponent::resized()

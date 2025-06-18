@@ -1,6 +1,7 @@
 #pragma once
 #include <JuceHeader.h>
 #include <random>
+#include "Mappers.h"
 #include "Processor.hpp"
 #include "Bones/FilterCell.h"
 #include "OutputData.h"
@@ -26,7 +27,7 @@ public:
                                               mBlockSize);
         initialiseGraph();
         mProcessorGraph.rebuild();
-        mAudioBufferFifo.prepare(2,inBlockSize); // Carefull two channels there
+        mAudioBufferFifo.prepare(2,inBlockSize);
         Mappers::getMapperInstance().setSampleRate(mSampleRate);
         mParameterSetup.initializeParameters();
         mProcessorGraph.prepareToPlay(mSampleRate, mBlockSize);

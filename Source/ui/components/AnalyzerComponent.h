@@ -2,6 +2,7 @@
 #pragma once
 
 #include <JuceHeader.h>
+#include "../../dsp/Mappers.h"// TODO Fix that shit
 #include "../../dsp/ParameterSetup.h"
 #include "../../dsp/OutputData.h"
 class SkeletonAudioProcessor;
@@ -33,46 +34,48 @@ struct FFTDataGenerator
     /**
      produces the FFT data from an audio buffer.
      */
-    void produceFFTDataForRendering(const juce::AudioBuffer<float>& audioData, const float negativeInfinity)
+    void produceFFTDataForRendering(const juce::AudioBuffer<float>& inBuffer, const float negativeInfinity)
     {
         const auto fftSize = getFFTSize();
 
-       fftData.assign(512, 0); // This line is good, assuming fftData is sized correctly
-       auto* readIndex = audioData.getReadPointer(0);
-       std::copy(readIndex, readIndex + fftSize, fftData.begin()); // This copies to fftData
+       mFftData.assign(fftSize, 0);// TODO Check
+       auto* readIndex = inBuffer.getReadPointer(0); // left channel TODO
+       std::copy(readIndex, readIndex + fftSize, mFftData.begin()); // This copies to fftData
 
         // first apply a windowing function to our data
-        window->multiplyWithWindowingTable (fftData.data(), fftSize);       // [1]
+        mWindow->multiplyWithWindowingTable (mFftData.data(), fftSize);       // [1]
 
         // then render our FFT data..
-        forwardFFT->performFrequencyOnlyForwardTransform (fftData.data());  // [2]
+        forwardFFT->performFrequencyOnlyForwardTransform (mFftData.data());  // [2]
 
         int numBins = (int)fftSize / 2;
 
         // //normalize the fft values.
         for( int i = 0; i < numBins; ++i )
         {
-            auto v = fftData[i];
-            fftData[i] /= (float) numBins;
-            if( !std::isinf(v) && !std::isnan(v) )
+            auto fftValueBin = mFftData[i];
+            if( !std::isinf(fftValueBin) && !std::isnan(fftValueBin) )
             {
-                v /= float(numBins);
+                fftValueBin /= float(numBins);
             }
             else
             {
-                v = 0.f;
+                fftValueBin = 0.f;
             }
-            fftData[i] = v;
+            mFftData[i] = fftValueBin;
         }
 
         //convert them to decibels
         for( int i = 0; i < numBins; ++i )
         {
-            fftData[i] = juce::Decibels::gainToDecibels(fftData[i], negativeInfinity);
+            mFftData[i] = juce::Decibels::gainToDecibels(mFftData[i], negativeInfinity);
         }
 
-        mCurrentFFT = fftData;
-      //fftDataFifo.push(fftData); // Push the std::vector<float> to the FIFO
+        int numSamples = (int) mFftData.size();
+
+        juce::AudioBuffer<float> buffer(1, numSamples);
+        buffer.copyFrom(0, 0, mFftData.data(), numSamples);
+        mFftDataFifo.push(buffer); // Need to template or create a vectorBufferFifo that can handle std::vector<float>
     }
 
     void changeOrder(FFTOrder newOrder)
@@ -85,30 +88,42 @@ struct FFTDataGenerator
         auto fftSize = getFFTSize();
 
         forwardFFT = std::make_unique<juce::dsp::FFT>(order);
-        window = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
+        mWindow = std::make_unique<juce::dsp::WindowingFunction<float>>(fftSize, juce::dsp::WindowingFunction<float>::blackmanHarris);
 
-        fftData.clear();
-        fftData.resize(fftSize * 2, 0); // fftData is now std::vector<float>, so resize works
+        mFftData.clear();
+        mFftData.resize(fftSize , 0); // fftData is now std::vector<float>, so resize works
 
-       // fftDataFifo.prepare(fftData.size()); // Prepare the FIFO to hold vectors of this size
+        mFftDataFifo.prepare(1, mFftData.size()); // Prepare the FIFO to hold vectors of this size
     }
     //==============================================================================
-    int getFFTSize() const { return 1 << 8; }
-     int getNumAvailableFFTDataBlocks() const { return fftDataFifo.getNumAvailableForReading(); }
-    std::vector<float> getFFTData() const { return mCurrentFFT; }
+    int getFFTSize() const { return 2048; }
+    int getNumAvailableFFTDataBlocks() const { return mFftDataFifo.getNumAvailableForReading(); }
+    std::vector<float> getFFTData() {
+        if (getNumAvailableFFTDataBlocks() > 0) {
+            juce::AudioBuffer<float> buffer;
+            buffer.setSize(1, mFftData.size());
+            mFftDataFifo.pull(buffer);
+
+            std::vector<float> data;
+            data.resize(mFftData.size());
+            std::copy(buffer.getReadPointer(0), buffer.getReadPointer(0) + mFftData.size(), data.begin());
+            return data;
+        }
+        return std::vector<float>{};
+    }
     //==============================================================================
     bool getFFTData(BlockType& dataToFill) { return false; // fftDataFifo.pull(dataToFill);
         }
 private:
     FFTOrder order;
-    std::vector<float> fftData; // Changed from BlockType to std::vector<float>
+    std::vector<float> mFftData; // Changed from BlockType to std::vector<float>
     std::unique_ptr<juce::dsp::FFT> forwardFFT;
-    std::unique_ptr<juce::dsp::WindowingFunction<float>> window;
+    std::unique_ptr<juce::dsp::WindowingFunction<float>> mWindow;
 
     // Assuming AudioBufferFifo is templated to store std::vector<float>
     // or that it can handle a BlockType that is compatible with std::vector<float>
     std::vector<float> mCurrentFFT;
-    AudioBufferFifo fftDataFifo; // The FIFO now stores std::vector<float>
+    AudioBufferFifo mFftDataFifo; // The FIFO now stores std::vector<float>
 };
 
 template<typename PathType>
@@ -120,24 +135,26 @@ struct AnalyzerPathGenerator
                       float binWidth,
                       float negativeInfinity)
     {
-        std::vector<float> newRenderData(renderData.begin() + 128, renderData.begin() + 256);
-        auto top = fftBounds.getY();
+        std::vector<float> newRenderData(renderData.size()); // WTF
+        auto top = 0;
         auto bottom = fftBounds.getHeight();
         auto width = fftBounds.getWidth();
 
-        int numBins = (int)fftSize / 2;
+        int numBins = (int)fftSize / 2; // Why
 
         PathType p;
-        p.preallocateSpace(3 * (int)fftBounds.getWidth());
+        p.preallocateSpace(3 * (int)fftBounds.getWidth()); // Why
 
         auto map = [bottom, top, negativeInfinity](float v)
         {
-            return juce::jmap(v,
-                              negativeInfinity, 0.f,
-                              float(bottom+10),   top);
+            return juce::jmap<float>(v,
+                              negativeInfinity,
+                              0.f,
+                              float(bottom),
+                              top);
         };
 
-        auto y = map(newRenderData[0]);
+        auto y = map(newRenderData[0]); // Not sure it do the whole thing
 
         if( std::isnan(y) || std::isinf(y) )
             y = bottom;
@@ -154,53 +171,59 @@ struct AnalyzerPathGenerator
             {
                 auto binFreq = binNum * binWidth;
                 auto normalizedBinX = juce::mapFromLog10(binFreq, 20.f, 20000.f);
-                int binX = std::floor(normalizedBinX * width);
+                int binX = std::floor(normalizedBinX * width); // This could go to far
                 p.lineTo(binX, y);
             }
         }
-        mPath = p;
 
-       // pathFifo.push(p);
+        mPathFifo.push(p);
     }
     
 
     int getNumPathsAvailable() const
     {
-        return pathFifo.getNumAvailableForReading();
+        return mPathFifo.size();
     }
 
-
-    PathType getPath() const
+    PathType getPath()
     {
-        return mPath;
+        return mPathFifo.front();
     }
 
-    bool getPath(PathType& path)
-    {
-        return false;//pathFifo.pull(path);
-    }
 private:
-    AudioBufferFifo pathFifo;
+    std::queue<juce::Path> mPathFifo;
     PathType mPath;
 };
 
 
 struct PathProducer {
-    PathProducer(AudioBufferFifo &scsf) : mAudioBufferFifo(&scsf) {
+    // It should have a fifo of path that can never be nul, always keeping an element
+    PathProducer(AudioBufferFifo &scsf)
+     : mAudioBufferFifo(&scsf)
+    {
         leftChannelFFTDataGenerator.changeOrder(FFTOrder::order32); // Will change to fifo to make biger ff
-        monoBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
+        mFFTBuffer.setSize(1, leftChannelFFTDataGenerator.getFFTSize());
     }
+    // We should have the ability to merge buffers
 
-    void process(juce::Rectangle<float> fftBounds, double sampleRate);
+    void process(Rectangle<float> fftBounds, double sampleRate);
 
-    juce::Path getPath() const { return pathProducer.getPath(); }
+        Path getPath() {
+        if (mPathProducer.getNumPathsAvailable() > 0)
+        {
+        return mPathProducer.getPath();
+        }
+        else
+        { return Path();}
+        }
 
 private:
     AudioBufferFifo *mAudioBufferFifo;
-    juce::AudioBuffer<float> monoBuffer;
-    FFTDataGenerator<std::vector<float> > leftChannelFFTDataGenerator;
-    AnalyzerPathGenerator<juce::Path> pathProducer;
-    juce::Path leftChannelFFTPath;
+    juce::AudioBuffer<float> mFFTBuffer;
+    FFTDataGenerator<std::vector<float>> leftChannelFFTDataGenerator;
+    AnalyzerPathGenerator<juce::Path> mPathProducer;
+    juce::Path mCurrentPath;
+    std::queue<juce::Path> mPathFifo;
 };
 
 struct ResponseCurveComponent : juce::Component,
